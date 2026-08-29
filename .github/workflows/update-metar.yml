@@ -1,0 +1,37 @@
+name: Build METAR snapshot
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Download current AWC METAR cache
+        run: |
+          curl --fail --retry 3 \
+            --user-agent "METAR-touch/1.0 GitHub Action" \
+            https://aviationweather.gov/data/cache/metars.cache.csv.gz \
+            -o metars.cache.csv.gz
+
+      - name: Convert to browser GeoJSON
+        run: |
+          python3 scripts/update_metar.py \
+            metars.cache.csv.gz \
+            metars_snapshot.json
+
+      - name: Commit snapshot
+        run: |
+          git config user.name "METAR-touch updater"
+          git config user.email "actions@users.noreply.github.com"
+          git add metars_snapshot.json
+          git diff --cached --quiet && exit 0
+          git commit -m "Update METAR snapshot"
+          git push
