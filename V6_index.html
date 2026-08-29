@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>METAR-touch v6</title>
+<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@6.6.0/dist/maplibre-gl.css">
+<style>
+*{box-sizing:border-box}html,body,#app,#map{margin:0;width:100%;height:100%;overflow:hidden}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#0d1014;color:#fff}
+#app{position:fixed;inset:0}#map{position:absolute;inset:0}
+#top{position:absolute;z-index:20;top:max(12px,env(safe-area-inset-top));left:12px;right:12px;display:flex;gap:8px;align-items:center;pointer-events:none}
+.pill{background:rgba(15,18,22,.94);border:1px solid #44505c;border-radius:12px;padding:9px 12px;backdrop-filter:blur(9px)}
+#title{font-size:18px;font-weight:760}#badge{font-size:13px;color:#ffcc66}
+#controls{margin-left:auto;display:flex;gap:7px;pointer-events:auto}
+.ctrl{height:46px;min-width:48px;padding:0 14px;border:1px solid #4b5661;border-radius:12px;background:rgba(18,22,27,.96);color:#fff;font-size:15px;font-weight:600}
+#layers{position:absolute;z-index:24;top:72px;right:12px;width:230px;display:none;background:rgba(18,22,27,.97);border:1px solid #4b5661;border-radius:14px;padding:10px}
+.row{display:flex;gap:7px;margin-bottom:8px}.row:last-child{margin-bottom:0}
+.layerbtn{flex:1;min-height:42px;border:1px solid #4b5661;border-radius:10px;background:#222831;color:#fff;font-size:13px}
+.layerbtn.active{outline:2px solid #0a84ff;background:#273342}
+#airmsg{font-size:11px;color:#b9c0c7;margin-top:7px}
+#legend{position:absolute;z-index:20;left:12px;bottom:max(24px,env(safe-area-inset-bottom));background:rgba(15,18,22,.94);border:1px solid #44505c;border-radius:12px;padding:9px 11px;font-size:12px}
+#legend span{margin-right:11px;white-space:nowrap}.key{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:4px}
+#status{position:absolute;z-index:20;right:12px;bottom:max(24px,env(safe-area-inset-bottom));background:rgba(15,18,22,.94);border:1px solid #44505c;border-radius:12px;padding:9px 11px;font-size:12px;color:#d0d6dc}
+#popup{display:none;position:absolute;z-index:30;right:16px;top:128px;width:min(410px,88vw);background:rgba(19,23,28,.985);border:1px solid #59636d;border-radius:16px;padding:18px;box-shadow:0 10px 34px rgba(0,0,0,.55)}
+#close{position:absolute;right:9px;top:9px;width:44px;height:44px;border-radius:50%;border:1px solid #525b64;background:#24292f;color:#fff;font-size:26px}
+#ptitle{font-size:23px;font-weight:760;padding-right:50px}#pname{color:#aeb7c0;margin-top:2px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:11px 18px;margin-top:15px}.k{font-size:11px;color:#aeb7c0;text-transform:uppercase}.v{font-size:15px;margin-top:2px}
+#raw{margin-top:14px;padding-top:12px;border-top:1px solid #343b43;font:12px/1.4 ui-monospace,SFMono-Regular,Menlo,monospace;color:#d5d9dd}
+@media(max-width:700px){#top{left:8px;right:8px}#layers{right:8px}#legend{left:8px;bottom:22px;font-size:11px}#status{display:none}#badge{display:none}}
+</style></head>
+<body><div id="app"><div id="map"></div>
+<div id="top"><div id="title" class="pill">METAR-touch v6</div><div id="badge" class="pill">LOADING METARS</div>
+<div id="controls"><button class="ctrl" id="minus">−</button><button class="ctrl" id="home">CONUS</button><button class="ctrl" id="plus">+</button><button class="ctrl" id="layerToggle">LAYERS</button></div></div>
+<div id="layers">
+ <div class="row"><button class="layerbtn active" data-base="road">Map</button><button class="layerbtn" data-base="sat">Satellite</button></div>
+ <div class="row"><button class="layerbtn" id="airspaceBtn">Airspace: OFF</button></div>
+ <div id="airmsg">FAA B/C/D loading…</div>
+</div>
+<div id="legend"><span><i class="key" style="background:#35c759"></i>VFR</span><span><i class="key" style="background:#0a84ff"></i>MVFR</span><span><i class="key" style="background:#ff453a"></i>IFR</span><span><i class="key" style="background:#bf5af2"></i>LIFR</span></div>
+<div id="status">METAR snapshot: loading…</div>
+<div id="popup"><button id="close">×</button><div id="ptitle"></div><div id="pname"></div>
+<div class="grid"><div><div class="k">Wind</div><div id="wind" class="v"></div></div><div><div class="k">Visibility</div><div id="vis" class="v"></div></div><div><div class="k">Ceiling</div><div id="ceil" class="v"></div></div><div><div class="k">Altimeter</div><div id="alt" class="v"></div></div><div><div class="k">Temp / Dew</div><div id="temp" class="v"></div></div><div><div class="k">Age</div><div id="age" class="v"></div></div></div><div id="raw"></div></div>
+</div>
+
+<script type="module">
+import * as maplibregl from 'https://unpkg.com/maplibre-gl@6.6.0/dist/maplibre-gl.mjs';
+
+const COLORS={VFR:"#35c759",MVFR:"#0a84ff",IFR:"#ff453a",LIFR:"#bf5af2",UNKNOWN:"#8e8e93"};
+const CONUS=[[-125.0,24.2],[-66.4,49.7]];
+let metarData={type:"FeatureCollection",features:[]}, airOn=false, airReady=false;
+
+const map=new maplibregl.Map({
+ container:"map",
+ style:"https://tiles.openfreemap.org/styles/liberty",
+ center:[-96,38],zoom:3.2,minZoom:1.2,maxZoom:13,
+ attributionControl:true,dragRotate:false,pitchWithRotate:false,maxPitch:0,touchPitch:false
+});
+map.touchZoomRotate.disableRotation();
+
+function fitCONUS(){map.fitBounds(CONUS,{padding:{top:90,bottom:72,left:58,right:58},duration:450,maxZoom:4.2})}
+function firstSymbol(){const x=(map.getStyle().layers||[]).find(l=>l.type==="symbol");return x&&x.id}
+
+function addSatellite(){
+ const before=firstSymbol();
+ map.addSource("satellite",{type:"raster",tiles:["https://tiles.maps.eox.at/wmts/1.0.0/s2cloudless-2020_3857/default/g/{z}/{y}/{x}.jpg"],tileSize:256,attribution:"Sentinel-2 cloudless — EOX"});
+ map.addLayer({id:"satellite",type:"raster",source:"satellite",paint:{"raster-opacity":0}},before);
+}
+
+function setMetars(gj){
+ metarData=gj;
+ if(map.getSource("metars")) map.getSource("metars").setData(gj);
+ else {
+  map.addSource("metars",{type:"geojson",data:gj});
+  map.addLayer({id:"metar-dots",type:"circle",source:"metars",
+   paint:{
+    "circle-radius":["interpolate",["linear"],["zoom"],2,3.0,5,4.3,8,5.3],
+    "circle-color":["match",["get","cat"],"VFR",COLORS.VFR,"MVFR",COLORS.MVFR,"IFR",COLORS.IFR,"LIFR",COLORS.LIFR,COLORS.UNKNOWN],
+    "circle-stroke-color":"rgba(255,255,255,.82)",
+    "circle-stroke-width":["interpolate",["linear"],["zoom"],2,.65,7,1.25],
+    "circle-opacity":.97
+   }});
+  map.addLayer({id:"metar-labels",type:"symbol",source:"metars",minzoom:6.0,
+    layout:{"text-field":["get","id"],"text-size":12,"text-offset":[.9,0],"text-anchor":"left","text-optional":true},
+    paint:{"text-color":"#fff","text-halo-color":"#111","text-halo-width":1.8}});
+  map.on("click","metar-dots",e=>{if(e.features?.[0])showMetar(e.features[0].properties)});
+ }
+ const n=gj.features?.length||0;
+ document.getElementById("badge").textContent=n?`${n.toLocaleString()} REAL METARS`:"NO METAR SNAPSHOT";
+ document.getElementById("status").textContent=n?`METAR snapshot: ${n.toLocaleString()} CONUS reports`:"Run the GitHub METAR snapshot action";
+}
+
+async function loadSnapshot(){
+ try{
+  const r=await fetch("./metars_snapshot.json",{cache:"no-store"});
+  if(!r.ok) throw new Error("snapshot missing");
+  setMetars(await r.json());
+ }catch(e){
+  setMetars({type:"FeatureCollection",features:[]});
+ }
+}
+
+async function fetchAirClass(cls){
+ const q=new URLSearchParams({
+  where:`CLASS='${cls}'`,
+  outFields:"NAME,IDENT,ICAO_ID,CLASS,UPPER_DESC,LOWER_DESC",
+  geometry:"-126,23,-65,51",geometryType:"esriGeometryEnvelope",
+  inSR:"4326",outSR:"4326",spatialRel:"esriSpatialRelIntersects",
+  returnGeometry:"true",f:"geojson"
+ });
+ const u="https://services6.arcgis.com/ssFJjBXIUyZDrSYZ/ArcGIS/rest/services/Class_Airspace/FeatureServer/0/query?"+q;
+ const r=await fetch(u); if(!r.ok) throw new Error(`FAA ${cls} ${r.status}`); return r.json();
+}
+async function addAirspace(){
+ try{
+  const parts=await Promise.all(["B","C","D"].map(fetchAirClass));
+  const features=parts.flatMap(x=>x.features||[]);
+  const gj={type:"FeatureCollection",features};
+  map.addSource("faa-air",{type:"geojson",data:gj});
+  map.addLayer({id:"air-fill",type:"fill",source:"faa-air",layout:{visibility:"none"},
+   paint:{"fill-color":["match",["get","CLASS"],"B","#ff2d55","C","#bf5af2","D","#0a84ff","#999"],"fill-opacity":.045}}, "metar-dots");
+  map.addLayer({id:"air-line",type:"line",source:"faa-air",layout:{visibility:"none"},
+   paint:{"line-color":["match",["get","CLASS"],"B","#ff2d55","C","#bf5af2","D","#0a84ff","#999"],"line-width":["interpolate",["linear"],["zoom"],3,1.15,7,2.4],"line-opacity":.88}}, "metar-dots");
+  airReady=true; document.getElementById("airmsg").textContent=`FAA airspace ready (${features.length.toLocaleString()} polygons)`;
+ }catch(e){
+  console.error(e);document.getElementById("airmsg").textContent="FAA airspace failed to load";
+ }
+}
+
+map.on("load",async()=>{
+ addSatellite();
+ setMetars({type:"FeatureCollection",features:[]});
+ await Promise.all([loadSnapshot(),addAirspace()]);
+ fitCONUS();
+});
+
+function setBase(which){
+ document.querySelectorAll("[data-base]").forEach(b=>b.classList.toggle("active",b.dataset.base===which));
+ if(map.getLayer("satellite"))map.setPaintProperty("satellite","raster-opacity",which==="sat"?1:0);
+}
+document.querySelectorAll("[data-base]").forEach(b=>b.onclick=()=>setBase(b.dataset.base));
+document.getElementById("layerToggle").onclick=()=>{const p=document.getElementById("layers");p.style.display=p.style.display==="block"?"none":"block"};
+document.getElementById("plus").onclick=()=>map.easeTo({zoom:map.getZoom()+1,duration:200});
+document.getElementById("minus").onclick=()=>map.easeTo({zoom:map.getZoom()-1,duration:200});
+document.getElementById("home").onclick=fitCONUS;
+document.getElementById("airspaceBtn").onclick=()=>{
+ if(!airReady)return;
+ airOn=!airOn;const v=airOn?"visible":"none";
+ map.setLayoutProperty("air-fill","visibility",v);map.setLayoutProperty("air-line","visibility",v);
+ const b=document.getElementById("airspaceBtn");b.textContent="Airspace: "+(airOn?"ON":"OFF");b.classList.toggle("active",airOn);
+};
+
+function ageText(epoch){
+ if(!epoch)return "—";const mins=Math.max(0,Math.round((Date.now()/1000-Number(epoch))/60));
+ return mins<60?`${mins} min`:`${Math.floor(mins/60)}h ${mins%60}m`;
+}
+function showMetar(p){
+ document.getElementById("popup").style.display="block";
+ document.getElementById("ptitle").innerHTML=`${p.id||"—"} <span style="color:${COLORS[p.cat]||COLORS.UNKNOWN};font-size:16px">${p.cat||"UNKNOWN"}</span>`;
+ document.getElementById("pname").textContent=p.name||"";
+ document.getElementById("wind").textContent=p.wind||"—";document.getElementById("vis").textContent=p.vis||"—";
+ document.getElementById("ceil").textContent=p.ceil||"—";document.getElementById("alt").textContent=p.alt||"—";
+ document.getElementById("temp").textContent=p.temp||"—";document.getElementById("age").textContent=ageText(p.obsEpoch);
+ document.getElementById("raw").textContent=p.raw||"";
+}
+map.on("click",e=>{if(map.getLayer("metar-dots")&&!map.queryRenderedFeatures(e.point,{layers:["metar-dots"]}).length)document.getElementById("popup").style.display="none"});
+document.getElementById("close").onclick=()=>document.getElementById("popup").style.display="none";
+</script></body></html>
