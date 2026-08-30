@@ -12,9 +12,8 @@ BASE = (
     "ArcGIS/rest/services/Class_Airspace/FeatureServer/0/query"
 )
 
-# About 0.002 degrees = roughly 400-700 ft depending on latitude.
-# More than adequate for a national/terminal-area display.
 TOLERANCE = 0.002
+PAGE_SIZE = 100
 
 
 def perpendicular_distance(point, start, end):
@@ -65,31 +64,23 @@ def simplify_line(points, tolerance):
             stack.append((first, index))
             stack.append((index, last))
 
-    return [
-        points[i]
-        for i in sorted(keep)
-    ]
+    return [points[i] for i in sorted(keep)]
 
 
 def simplify_ring(ring):
     if len(ring) < 5:
         return ring
 
-    # Remove duplicate closing point during simplification.
-    closed = ring[0] == ring[-1]
-
-    points = ring[:-1] if closed else ring
+    points = ring[:-1] if ring[0] == ring[-1] else ring
 
     simplified = simplify_line(
         points,
         TOLERANCE
     )
 
-    # Polygon rings need at least 3 unique points.
     if len(simplified) < 3:
         simplified = points
 
-    # Round coordinates too.
     simplified = [
         [round(p[0], 5), round(p[1], 5)]
         for p in simplified
@@ -126,44 +117,36 @@ def simplify_geometry(geometry):
     return geometry
 
 
-features = []
-
-for cls in ("B", "C", "D"):
-
+def fetch_page(cls, offset):
     params = {
         "where": f"CLASS='{cls}'",
-
         "outFields":
-            "NAME,IDENT,ICAO_ID,CLASS,"
-            "UPPER_DESC,LOWER_DESC",
+            "NAME,IDENT,ICAO_ID,CLASS,UPPER_DESC,LOWER_DESC",
 
         "geometry": "-126,23,-65,51",
-
-        "geometryType":
-            "esriGeometryEnvelope",
+        "geometryType": "esriGeometryEnvelope",
 
         "inSR": "4326",
         "outSR": "4326",
 
-        "spatialRel":
-            "esriSpatialRelIntersects",
+        "spatialRel": "esriSpatialRelIntersects",
 
         "returnGeometry": "true",
+
+        "resultOffset": str(offset),
+        "resultRecordCount": str(PAGE_SIZE),
+
+        "orderByFields": "OBJECTID",
 
         "f": "geojson",
     }
 
-    url = (
-        BASE +
-        "?" +
-        urllib.parse.urlencode(params)
-    )
+    url = BASE + "?" + urllib.parse.urlencode(params)
 
     req = urllib.request.Request(
         url,
         headers={
-            "User-Agent":
-                "METAR-touch/1.0"
+            "User-Agent": "METAR-touch/1.0"
         }
     )
 
@@ -171,24 +154,52 @@ for cls in ("B", "C", "D"):
         req,
         timeout=180
     ) as response:
-        data = json.load(response)
+        return json.load(response)
 
-    if "error" in data:
-        raise RuntimeError(
-            data["error"]
+
+features = []
+
+for cls in ("B", "C", "D"):
+
+    offset = 0
+
+    while True:
+        print(
+            f"Downloading Class {cls}, "
+            f"offset {offset}"
         )
 
-    for feature in data.get(
-        "features",
-        []
-    ):
-        feature["geometry"] = (
-            simplify_geometry(
-                feature.get("geometry")
+        data = fetch_page(
+            cls,
+            offset
+        )
+
+        if "error" in data:
+            raise RuntimeError(
+                data["error"]
             )
+
+        page = data.get(
+            "features",
+            []
         )
 
-        features.append(feature)
+        if not page:
+            break
+
+        for feature in page:
+            feature["geometry"] = (
+                simplify_geometry(
+                    feature.get("geometry")
+                )
+            )
+
+            features.append(feature)
+
+        if len(page) < PAGE_SIZE:
+            break
+
+        offset += PAGE_SIZE
 
 
 output = {
@@ -203,8 +214,8 @@ output = {
             ).isoformat(),
 
         "source":
-            "FAA Class Airspace "
-            "FeatureServer; classes B/C/D",
+            "FAA Class Airspace FeatureServer; "
+            "classes B/C/D",
 
         "simplification_tolerance":
             TOLERANCE,
