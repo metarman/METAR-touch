@@ -3,50 +3,21 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<title>METAR-touch v14</title>
-
+<title>METAR-touch v15</title>
 <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@6.6.0/dist/maplibre-gl.css">
 
 <style>
-*{
- box-sizing:border-box
-}
-
-html,
-body,
-#app,
-#map{
- margin:0;
- width:100%;
- height:100%;
- overflow:hidden
-}
-
-body{
- font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
- background:#0d1014;
- color:#fff
-}
-
-#app{
- position:fixed;
- inset:0
-}
-
-#map{
- position:absolute;
- inset:0
-}
+*{box-sizing:border-box}
+html,body,#app,#map{margin:0;width:100%;height:100%;overflow:hidden}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#0d1014;color:#fff}
+#app{position:fixed;inset:0}
+#map{position:absolute;inset:0}
 
 #top{
- position:absolute;
- z-index:20;
+ position:absolute;z-index:20;
  top:max(12px,env(safe-area-inset-top));
- left:12px;
- right:12px;
- display:flex;
- gap:8px;
- align-items:center;
+ left:12px;right:12px;
+ display:flex;gap:8px;align-items:center;
  pointer-events:none
 }
 
@@ -58,26 +29,17 @@ body{
  backdrop-filter:blur(9px)
 }
 
-#title{
- font-size:18px;
- font-weight:760
-}
-
-#badge{
- font-size:13px;
- color:#ffcc66
-}
+#title{font-size:18px;font-weight:760}
+#badge{font-size:13px;color:#ffcc66}
 
 #controls{
  margin-left:auto;
- display:flex;
- gap:7px;
+ display:flex;gap:7px;
  pointer-events:auto
 }
 
 .ctrl{
- height:46px;
- min-width:48px;
+ height:46px;min-width:48px;
  padding:0 14px;
  border:1px solid #4b5661;
  border-radius:12px;
@@ -88,10 +50,8 @@ body{
 }
 
 #layers{
- position:absolute;
- z-index:24;
- top:72px;
- right:12px;
+ position:absolute;z-index:24;
+ top:72px;right:12px;
  width:230px;
  display:none;
  background:rgba(18,22,27,.97);
@@ -100,19 +60,11 @@ body{
  padding:10px
 }
 
-.row{
- display:flex;
- gap:7px;
- margin-bottom:8px
-}
-
-.row:last-child{
- margin-bottom:0
-}
+.row{display:flex;gap:7px;margin-bottom:8px}
+.row:last-child{margin-bottom:0}
 
 .layerbtn{
- flex:1;
- min-height:42px;
+ flex:1;min-height:42px;
  border:1px solid #4b5661;
  border-radius:10px;
  background:#222831;
@@ -163,8 +115,7 @@ body{
 }
 
 #legend{
- position:absolute;
- z-index:20;
+ position:absolute;z-index:20;
  left:12px;
  bottom:max(24px,env(safe-area-inset-bottom));
  background:rgba(15,18,22,.94);
@@ -174,22 +125,17 @@ body{
  font-size:12px
 }
 
-#legend span{
- margin-right:11px;
- white-space:nowrap
-}
+#legend span{margin-right:11px;white-space:nowrap}
 
 .key{
  display:inline-block;
- width:9px;
- height:9px;
+ width:9px;height:9px;
  border-radius:50%;
  margin-right:4px
 }
 
 #status{
- position:absolute;
- z-index:20;
+ position:absolute;z-index:20;
  right:12px;
  bottom:max(24px,env(safe-area-inset-bottom));
  background:rgba(15,18,22,.94);
@@ -202,10 +148,8 @@ body{
 
 #popup{
  display:none;
- position:absolute;
- z-index:30;
- right:16px;
- top:128px;
+ position:absolute;z-index:30;
+ right:16px;top:128px;
  width:min(410px,88vw);
  background:rgba(19,23,28,.985);
  border:1px solid #59636d;
@@ -216,10 +160,8 @@ body{
 
 #close{
  position:absolute;
- right:9px;
- top:9px;
- width:44px;
- height:44px;
+ right:9px;top:9px;
+ width:44px;height:44px;
  border-radius:50%;
  border:1px solid #525b64;
  background:#24292f;
@@ -227,16 +169,8 @@ body{
  font-size:26px
 }
 
-#ptitle{
- font-size:23px;
- font-weight:760;
- padding-right:50px
-}
-
-#pname{
- color:#aeb7c0;
- margin-top:2px
-}
+#ptitle{font-size:23px;font-weight:760;padding-right:50px}
+#pname{color:#aeb7c0;margin-top:2px}
 
 .grid{
  display:grid;
@@ -251,10 +185,7 @@ body{
  text-transform:uppercase
 }
 
-.v{
- font-size:15px;
- margin-top:2px
-}
+.v{font-size:15px;margin-top:2px}
 
 #raw{
  margin-top:14px;
@@ -265,28 +196,11 @@ body{
 }
 
 @media(max-width:700px){
- #top{
-  left:8px;
-  right:8px
- }
-
- #layers{
-  right:8px
- }
-
- #legend{
-  left:8px;
-  bottom:22px;
-  font-size:11px
- }
-
- #status{
-  display:none
- }
-
- #badge{
-  display:none
- }
+ #top{left:8px;right:8px}
+ #layers{right:8px}
+ #legend{left:8px;bottom:22px;font-size:11px}
+ #status{display:none}
+ #badge{display:none}
 }
 </style>
 </head>
@@ -294,174 +208,74 @@ body{
 <body>
 
 <div id="app">
-
 <div id="map"></div>
 
 <div id="top">
+ <div id="title" class="pill">METAR-touch v15</div>
+ <div id="badge" class="pill">LOADING METARS</div>
 
-<div id="title" class="pill">
-METAR-touch v14
-</div>
-
-<div id="badge" class="pill">
-LOADING METARS
-</div>
-
-<div id="controls">
-
-<button class="ctrl" id="minus">
-−
-</button>
-
-<button class="ctrl" id="home">
-CONUS
-</button>
-
-<button class="ctrl" id="plus">
-+
-</button>
-
-<button class="ctrl" id="layerToggle">
-LAYERS
-</button>
-
-</div>
+ <div id="controls">
+  <button class="ctrl" id="minus">−</button>
+  <button class="ctrl" id="home">CONUS</button>
+  <button class="ctrl" id="plus">+</button>
+  <button class="ctrl" id="layerToggle">LAYERS</button>
+ </div>
 </div>
 
 <div id="layers">
 
-<div class="row">
+ <div class="row">
+  <button class="layerbtn active" data-base="road">Map</button>
+  <button class="layerbtn" data-base="terrain">Terrain</button>
+  <button class="layerbtn" data-base="sat">Satellite</button>
+ </div>
 
-<button class="layerbtn active" data-base="road">
-Map
-</button>
+ <div class="row">
+  <button class="layerbtn" id="airspaceBtn">Airspace: OFF</button>
+ </div>
 
-<button class="layerbtn" data-base="terrain">
-Terrain
-</button>
+ <div id="airmsg">FAA B/C/D loading…</div>
 
-<button class="layerbtn" data-base="sat">
-Satellite
-</button>
+ <div id="densityWrap">
+  <div id="densityHead">
+   <span>METAR density</span>
+   <span id="densityValue">~45 mi spacing</span>
+  </div>
 
-</div>
+  <input id="density" type="range" min="1" max="14" step="1" value="7">
 
-<div class="row">
-
-<button class="layerbtn" id="airspaceBtn">
-Airspace: OFF
-</button>
-
-</div>
-
-<div id="airmsg">
-FAA B/C/D loading…
-</div>
-
-<div id="densityWrap">
-
-<div id="densityHead">
-
-<span>
-METAR density
-</span>
-
-<span id="densityValue">
-~45 mi spacing
-</span>
-
-</div>
-
-<input
- id="density"
- type="range"
- min="1"
- max="14"
- step="1"
- value="7"
->
-
-<div id="densityNote">
-Screen density. Zooming in automatically reveals more stations.
-</div>
-
-</div>
+  <div id="densityNote">
+   Screen density. Zooming in automatically reveals more stations.
+  </div>
+ </div>
 </div>
 
 <div id="legend">
-
-<span>
-<i class="key" style="background:#35c759"></i>
-VFR
-</span>
-
-<span>
-<i class="key" style="background:#0a84ff"></i>
-MVFR
-</span>
-
-<span>
-<i class="key" style="background:#ff453a"></i>
-IFR
-</span>
-
-<span>
-<i class="key" style="background:#bf5af2"></i>
-LIFR
-</span>
-
+ <span><i class="key" style="background:#35c759"></i>VFR</span>
+ <span><i class="key" style="background:#0a84ff"></i>MVFR</span>
+ <span><i class="key" style="background:#ff453a"></i>IFR</span>
+ <span><i class="key" style="background:#bf5af2"></i>LIFR</span>
 </div>
 
-<div id="status">
-METAR snapshot: loading…
-</div>
+<div id="status">METAR snapshot: loading…</div>
 
 <div id="popup">
+ <button id="close">×</button>
+ <div id="ptitle"></div>
+ <div id="pname"></div>
 
-<button id="close">
-×
-</button>
+ <div class="grid">
+  <div><div class="k">Wind</div><div id="wind" class="v"></div></div>
+  <div><div class="k">Visibility</div><div id="vis" class="v"></div></div>
+  <div><div class="k">Ceiling</div><div id="ceil" class="v"></div></div>
+  <div><div class="k">Altimeter</div><div id="alt" class="v"></div></div>
+  <div><div class="k">Temp / Dew</div><div id="temp" class="v"></div></div>
+  <div><div class="k">Age</div><div id="age" class="v"></div></div>
+ </div>
 
-<div id="ptitle"></div>
-<div id="pname"></div>
-
-<div class="grid">
-
-<div>
-<div class="k">Wind</div>
-<div id="wind" class="v"></div>
+ <div id="raw"></div>
 </div>
 
-<div>
-<div class="k">Visibility</div>
-<div id="vis" class="v"></div>
-</div>
-
-<div>
-<div class="k">Ceiling</div>
-<div id="ceil" class="v"></div>
-</div>
-
-<div>
-<div class="k">Altimeter</div>
-<div id="alt" class="v"></div>
-</div>
-
-<div>
-<div class="k">Temp / Dew</div>
-<div id="temp" class="v"></div>
-</div>
-
-<div>
-<div class="k">Age</div>
-<div id="age" class="v"></div>
-</div>
-
-</div>
-
-<div id="raw"></div>
-
-</div>
 </div>
 
 
@@ -479,58 +293,37 @@ const COLORS={
  UNKNOWN:"#8e8e93"
 };
 
-
 const CONUS=[
  [-126.5,22.4],
  [-65.3,50.4]
 ];
-
 
 let metarData={
  type:"FeatureCollection",
  features:[]
 };
 
+let airportIndex=new Map();
 
 let airOn=false;
 let airReady=false;
 
+let densitySetting=7;
 
-const map=
-new maplibregl.Map({
 
+const map=new maplibregl.Map({
  container:"map",
-
- style:
- "https://tiles.openfreemap.org/styles/liberty",
-
- center:[
-  -96,
-  38
- ],
-
+ style:"https://tiles.openfreemap.org/styles/liberty",
+ center:[-96,38],
  zoom:3.2,
-
  minZoom:1.2,
-
- /*
- V14:
- allow enough zoom for neighborhood
- street detail and street names.
- */
  maxZoom:16,
-
  attributionControl:true,
-
  dragRotate:false,
-
  pitchWithRotate:false,
-
  maxPitch:0,
-
  touchPitch:false
 });
-
 
 map.touchZoomRotate.disableRotation();
 
@@ -546,9 +339,7 @@ function fitCONUS(){
     left:58,
     right:58
    },
-
    duration:450,
-
    maxZoom:4.2
   }
  );
@@ -557,36 +348,24 @@ function fitCONUS(){
 
 function firstSymbol(){
 
- const x=
-  (
-   map.getStyle().layers||[]
-  ).find(
-   l=>l.type==="symbol"
-  );
+ const x=(map.getStyle().layers||[])
+  .find(l=>l.type==="symbol");
 
  return x&&x.id;
 }
 
 
-/* ==========================
-   REMOVE BUILT-IN ROAD CLUTTER
-   ========================== */
+/* =====================================
+   REMOVE LIBERTY ROAD NETWORK
+
+   We draw our own controlled hierarchy.
+   ===================================== */
 
 function suppressBuiltInRoads(){
 
- for(
-  const layer of
-  map.getStyle().layers||[]
- ){
+ for(const layer of map.getStyle().layers||[]){
 
-  const sourceLayer=
-   layer["source-layer"]||"";
-
-  /*
-  We replace the Liberty road network
-  ourselves so road detail can be
-  controlled explicitly by zoom.
-  */
+  const sourceLayer=layer["source-layer"]||"";
 
   if(
    sourceLayer==="transportation" ||
@@ -594,27 +373,24 @@ function suppressBuiltInRoads(){
   ){
 
    try{
-
     map.setLayoutProperty(
      layer.id,
      "visibility",
      "none"
     );
-
    }catch(e){}
   }
  }
 }
 
 
-/* ==========================
-   BASEMAP + ROAD HIERARCHY
-   ========================== */
+/* =====================================
+   BASEMAP / BORDERS / ROADS
+   ===================================== */
 
-function addSatellite(){
+function addBasemapLayers(){
 
- const before=
-  firstSymbol();
+ const before=firstSymbol();
 
 
  /* SATELLITE */
@@ -623,114 +399,74 @@ function addSatellite(){
   "satellite",
   {
    type:"raster",
-
    tiles:[
     "https://tiles.maps.eox.at/wmts/1.0.0/s2cloudless-2020_3857/default/g/{z}/{y}/{x}.jpg"
    ],
-
    tileSize:256,
-
-   attribution:
-   "Sentinel-2 cloudless — EOX"
+   attribution:"Sentinel-2 cloudless — EOX"
   }
  );
-
 
  map.addLayer(
   {
    id:"satellite",
-
    type:"raster",
-
    source:"satellite",
-
    paint:{
     "raster-opacity":0
    }
   },
-
   before
  );
 
 
- /* PHYSICAL TERRAIN */
+ /* TERRAIN */
 
  map.addSource(
   "terrain-physical",
   {
    type:"raster",
-
    tiles:[
     "https://tiles.openfreemap.org/natural_earth/ne2sr/{z}/{x}/{y}.png"
    ],
-
    tileSize:256,
-
    maxzoom:6,
-
-   attribution:
-   "Natural Earth / OpenFreeMap"
+   attribution:"Natural Earth / OpenFreeMap"
   }
  );
-
 
  map.addLayer(
   {
    id:"terrain-physical",
-
    type:"raster",
-
    source:"terrain-physical",
-
    paint:{
-
     "raster-opacity":0,
-
     "raster-saturation":0.12,
-
     "raster-contrast":0.08
    }
   },
-
   before
  );
 
 
- /* ==========================
-    COUNTRY BORDERS
-    ========================== */
+ /* COUNTRY BORDER CASING */
 
  map.addLayer(
   {
    id:"country-border-casing",
-
    type:"line",
-
    source:"openmaptiles",
-
    "source-layer":"boundary",
 
    filter:[
     "all",
-
-    [
-     "==",
-     ["get","admin_level"],
-     2
-    ],
-
-    [
-     "!=",
-     ["get","maritime"],
-     1
-    ]
+    ["==",["get","admin_level"],2],
+    ["!=",["get","maritime"],1]
    ],
 
    paint:{
-
-    "line-color":
-    "rgba(255,255,255,0.82)",
-
+    "line-color":"rgba(255,255,255,0.82)",
     "line-width":[
      "interpolate",
      ["linear"],
@@ -738,46 +474,28 @@ function addSatellite(){
      2,3.0,
      6,4.0
     ],
-
     "line-opacity":0.9
    }
   },
-
   before
  );
 
 
  map.addLayer(
   {
-   id:"country-border-v14",
-
+   id:"country-border-v15",
    type:"line",
-
    source:"openmaptiles",
-
    "source-layer":"boundary",
 
    filter:[
     "all",
-
-    [
-     "==",
-     ["get","admin_level"],
-     2
-    ],
-
-    [
-     "!=",
-     ["get","maritime"],
-     1
-    ]
+    ["==",["get","admin_level"],2],
+    ["!=",["get","maritime"],1]
    ],
 
    paint:{
-
-    "line-color":
-    "#3d4752",
-
+    "line-color":"#3d4752",
     "line-width":[
      "interpolate",
      ["linear"],
@@ -785,50 +503,30 @@ function addSatellite(){
      2,1.4,
      6,2.0
     ],
-
     "line-opacity":0.95
    }
   },
-
   before
  );
 
 
- /* ==========================
-    STATE BORDERS
-    ========================== */
+ /* STATE BORDERS */
 
  map.addLayer(
   {
    id:"state-border-casing",
-
    type:"line",
-
    source:"openmaptiles",
-
    "source-layer":"boundary",
 
    filter:[
     "all",
-
-    [
-     "==",
-     ["get","admin_level"],
-     4
-    ],
-
-    [
-     "!=",
-     ["get","maritime"],
-     1
-    ]
+    ["==",["get","admin_level"],4],
+    ["!=",["get","maritime"],1]
    ],
 
    paint:{
-
-    "line-color":
-    "rgba(255,255,255,0.78)",
-
+    "line-color":"rgba(255,255,255,0.78)",
     "line-width":[
      "interpolate",
      ["linear"],
@@ -836,46 +534,28 @@ function addSatellite(){
      2,2.3,
      6,3.1
     ],
-
     "line-opacity":0.88
    }
   },
-
   before
  );
 
 
  map.addLayer(
   {
-   id:"state-border-v14",
-
+   id:"state-border-v15",
    type:"line",
-
    source:"openmaptiles",
-
    "source-layer":"boundary",
 
    filter:[
     "all",
-
-    [
-     "==",
-     ["get","admin_level"],
-     4
-    ],
-
-    [
-     "!=",
-     ["get","maritime"],
-     1
-    ]
+    ["==",["get","admin_level"],4],
+    ["!=",["get","maritime"],1]
    ],
 
    paint:{
-
-    "line-color":
-    "#66727d",
-
+    "line-color":"#66727d",
     "line-width":[
      "interpolate",
      ["linear"],
@@ -883,64 +563,41 @@ function addSatellite(){
      2,1.05,
      6,1.55
     ],
-
-    "line-dasharray":[
-     3,
-     2
-    ],
-
+    "line-dasharray":[3,2],
     "line-opacity":0.96
    }
   },
-
   before
  );
 
 
- /*
- ====================================
- ROAD LEVEL 1
- Interstate / major highways
- visible fairly early
- ====================================
- */
+ /* =====================================
+    MAJOR HIGHWAYS
+    ===================================== */
 
  map.addLayer(
   {
    id:"road-major-casing",
-
    type:"line",
-
    source:"openmaptiles",
-
    "source-layer":"transportation",
-
    minzoom:4.2,
 
    filter:[
     "match",
     ["get","class"],
-
-    [
-     "motorway",
-     "trunk",
-     "primary"
-    ],
-
+    ["motorway","trunk","primary"],
     true,
     false
    ],
 
    paint:{
-
-    "line-color":
-    "rgba(255,255,255,.92)",
+    "line-color":"rgba(255,255,255,.92)",
 
     "line-width":[
      "interpolate",
      ["linear"],
      ["zoom"],
-
      4.2,1.7,
      7,3.0,
      10,4.6,
@@ -950,7 +607,6 @@ function addSatellite(){
     "line-opacity":0.9
    }
   },
-
   before
  );
 
@@ -958,44 +614,26 @@ function addSatellite(){
  map.addLayer(
   {
    id:"road-major",
-
    type:"line",
-
    source:"openmaptiles",
-
    "source-layer":"transportation",
-
    minzoom:4.2,
 
    filter:[
     "match",
     ["get","class"],
-
-    [
-     "motorway",
-     "trunk",
-     "primary"
-    ],
-
+    ["motorway","trunk","primary"],
     true,
     false
    ],
 
    paint:{
-
     "line-color":[
      "match",
      ["get","class"],
-
-     "motorway",
-     "#d9a441",
-
-     "trunk",
-     "#dcb768",
-
-     "primary",
-     "#d7bd82",
-
+     "motorway","#d9a441",
+     "trunk","#dcb768",
+     "primary","#d7bd82",
      "#d7bd82"
     ],
 
@@ -1003,7 +641,6 @@ function addSatellite(){
      "interpolate",
      ["linear"],
      ["zoom"],
-
      4.2,.85,
      7,1.6,
      10,2.6,
@@ -1013,63 +650,47 @@ function addSatellite(){
     "line-opacity":0.95
    }
   },
-
   before
  );
 
 
- /*
- ====================================
- ROAD LEVEL 2
- Secondary / regional roads
- begin later
- ====================================
- */
+ /* =====================================
+    SECONDARY / REGIONAL ROADS
+
+    V15: earlier than V14.
+    ===================================== */
 
  map.addLayer(
   {
    id:"road-secondary-casing",
-
    type:"line",
-
    source:"openmaptiles",
-
    "source-layer":"transportation",
-
-   minzoom:8.2,
+   minzoom:7.3,
 
    filter:[
     "match",
     ["get","class"],
-
-    [
-     "secondary",
-     "tertiary"
-    ],
-
+    ["secondary","tertiary"],
     true,
     false
    ],
 
    paint:{
-
-    "line-color":
-    "rgba(255,255,255,.82)",
+    "line-color":"rgba(255,255,255,.82)",
 
     "line-width":[
      "interpolate",
      ["linear"],
      ["zoom"],
-
-     8.2,1.5,
-     11,2.6,
-     14,4.0
+     7.3,1.25,
+     10,2.2,
+     13,3.5
     ],
 
-    "line-opacity":0.85
+    "line-opacity":0.82
    }
   },
-
   before
  );
 
@@ -1077,103 +698,87 @@ function addSatellite(){
  map.addLayer(
   {
    id:"road-secondary",
-
    type:"line",
-
    source:"openmaptiles",
-
    "source-layer":"transportation",
-
-   minzoom:8.2,
+   minzoom:7.3,
 
    filter:[
     "match",
     ["get","class"],
-
-    [
-     "secondary",
-     "tertiary"
-    ],
-
+    ["secondary","tertiary"],
     true,
     false
    ],
 
    paint:{
-
-    "line-color":
-    "#d9c8a0",
+    "line-color":"#d9c8a0",
 
     "line-width":[
      "interpolate",
      ["linear"],
      ["zoom"],
-
-     8.2,.65,
-     11,1.3,
-     14,2.1
+     7.3,.50,
+     10,1.05,
+     13,1.8
     ],
 
-    "line-opacity":0.9
+    "line-opacity":0.86
    }
   },
-
   before
  );
 
 
- /*
- ====================================
- ROAD LEVEL 3
- Local streets
- appear only close-in
- ====================================
- */
+ /* =====================================
+    LOCAL STREETS
+
+    V14 = 11.1
+    V15 = 10.0
+
+    Street geometry therefore appears
+    about one zoom level sooner.
+    ===================================== */
 
  map.addLayer(
   {
    id:"road-local-casing",
-
    type:"line",
-
    source:"openmaptiles",
-
    "source-layer":"transportation",
-
-   minzoom:11.1,
+   minzoom:10.0,
 
    filter:[
     "match",
     ["get","class"],
-
-    [
-     "minor",
-     "service"
-    ],
-
+    ["minor","service"],
     true,
     false
    ],
 
    paint:{
-
-    "line-color":
-    "rgba(255,255,255,.80)",
+    "line-color":"rgba(255,255,255,.76)",
 
     "line-width":[
      "interpolate",
      ["linear"],
      ["zoom"],
-
-     11.1,1.1,
-     13,2.0,
+     10,0.75,
+     12,1.45,
+     14,2.3,
      16,3.2
     ],
 
-    "line-opacity":0.78
+    "line-opacity":[
+     "interpolate",
+     ["linear"],
+     ["zoom"],
+     10,.35,
+     11,.60,
+     13,.78
+    ]
    }
   },
-
   before
  );
 
@@ -1181,99 +786,73 @@ function addSatellite(){
  map.addLayer(
   {
    id:"road-local",
-
    type:"line",
-
    source:"openmaptiles",
-
    "source-layer":"transportation",
-
-   minzoom:11.1,
+   minzoom:10.0,
 
    filter:[
     "match",
     ["get","class"],
-
-    [
-     "minor",
-     "service"
-    ],
-
+    ["minor","service"],
     true,
     false
    ],
 
    paint:{
-
-    "line-color":
-    "#c9c4b6",
+    "line-color":"#c9c4b6",
 
     "line-width":[
      "interpolate",
      ["linear"],
      ["zoom"],
-
-     11.1,.45,
-     13,.9,
-     16,1.6
+     10,.30,
+     12,.60,
+     14,1.10,
+     16,1.60
     ],
 
-    "line-opacity":0.82
+    "line-opacity":[
+     "interpolate",
+     ["linear"],
+     ["zoom"],
+     10,.30,
+     11,.52,
+     13,.82
+    ]
    }
   },
-
   before
  );
 
 
- /*
- ====================================
- HIGHWAY NUMBERS
- ====================================
- */
+ /* =====================================
+    HIGHWAY REFERENCES
+    ===================================== */
 
  map.addLayer(
   {
    id:"highway-ref-labels",
-
    type:"symbol",
-
    source:"openmaptiles",
-
-   "source-layer":
-   "transportation_name",
-
+   "source-layer":"transportation_name",
    minzoom:5.0,
-
    maxzoom:12.5,
 
    filter:[
     "all",
-
-    [
-     "has",
-     "ref"
-    ],
-
+    ["has","ref"],
     [
      "match",
      ["get","class"],
-
-     [
-      "motorway",
-      "trunk",
-      "primary"
-     ],
-
+     ["motorway","trunk","primary"],
      true,
      false
     ]
    ],
 
    layout:{
-
-    "symbol-placement":
-    "line",
+    "symbol-placement":"line",
 
     "text-field":[
      "coalesce",
@@ -1285,73 +864,43 @@ function addSatellite(){
      "interpolate",
      ["linear"],
      ["zoom"],
-
      5,10,
      9,12,
      12,13
     ],
 
     "symbol-spacing":210,
-
-    "text-rotation-alignment":
-    "map",
-
-    "text-keep-upright":
-    true,
-
-    "text-allow-overlap":
-    false
+    "text-rotation-alignment":"map",
+    "text-keep-upright":true,
+    "text-allow-overlap":false
    },
 
    paint:{
-
-    "text-color":
-    "#333",
-
-    "text-halo-color":
-    "rgba(255,255,255,.96)",
-
-    "text-halo-width":
-    2.2
+    "text-color":"#333",
+    "text-halo-color":"rgba(255,255,255,.96)",
+    "text-halo-width":2.2
    }
   },
-
   before
  );
 
 
- /*
- ====================================
- MAJOR ROAD NAMES
- only once fairly close
- ====================================
- */
+ /* MAJOR ROAD NAMES */
 
  map.addLayer(
   {
    id:"major-road-names",
-
    type:"symbol",
-
    source:"openmaptiles",
-
-   "source-layer":
-   "transportation_name",
-
-   minzoom:10.4,
+   "source-layer":"transportation_name",
+   minzoom:9.8,
 
    filter:[
     "all",
-
-    [
-     "has",
-     "name"
-    ],
-
+    ["has","name"],
     [
      "match",
      ["get","class"],
-
      [
       "motorway",
       "trunk",
@@ -1359,204 +908,194 @@ function addSatellite(){
       "secondary",
       "tertiary"
      ],
-
      true,
      false
     ]
    ],
 
    layout:{
-
-    "symbol-placement":
-    "line",
-
-    "text-field":[
-     "get",
-     "name"
-    ],
+    "symbol-placement":"line",
+    "text-field":["get","name"],
 
     "text-size":[
      "interpolate",
      ["linear"],
      ["zoom"],
-
-     10.4,11,
-     13,13,
+     9.8,10,
+     12,12,
      16,15
     ],
 
     "symbol-spacing":270,
-
     "text-max-angle":35,
-
-    "text-rotation-alignment":
-    "map",
-
-    "text-keep-upright":
-    true,
-
-    "text-allow-overlap":
-    false,
-
-    "text-ignore-placement":
-    false
+    "text-rotation-alignment":"map",
+    "text-keep-upright":true,
+    "text-allow-overlap":false,
+    "text-ignore-placement":false
    },
 
    paint:{
-
-    "text-color":
-    "#fff",
-
-    "text-halo-color":
-    "rgba(20,20,20,.88)",
-
-    "text-halo-width":
-    2
+    "text-color":"#fff",
+    "text-halo-color":"rgba(20,20,20,.88)",
+    "text-halo-width":2
    }
   },
-
   before
  );
 
 
- /*
- ====================================
- LOCAL STREET NAMES
+ /* =====================================
+    LOCAL STREET NAMES
 
- This is the ForeFlight-like step:
- streets exist first, names appear
- only after another zoom step.
- ====================================
- */
+    Geometry comes earlier, but names
+    remain deliberately delayed.
+    ===================================== */
 
  map.addLayer(
   {
    id:"local-street-names",
-
    type:"symbol",
-
    source:"openmaptiles",
-
-   "source-layer":
-   "transportation_name",
-
-   minzoom:12.4,
+   "source-layer":"transportation_name",
+   minzoom:12.0,
 
    filter:[
     "all",
-
-    [
-     "has",
-     "name"
-    ],
-
+    ["has","name"],
     [
      "match",
      ["get","class"],
-
-     [
-      "minor",
-      "service"
-     ],
-
+     ["minor","service"],
      true,
      false
     ]
    ],
 
    layout:{
-
-    "symbol-placement":
-    "line",
-
-    "text-field":[
-     "get",
-     "name"
-    ],
+    "symbol-placement":"line",
+    "text-field":["get","name"],
 
     "text-size":[
      "interpolate",
      ["linear"],
      ["zoom"],
-
-     12.4,11,
+     12,10,
      14,13,
      16,15
     ],
 
     "symbol-spacing":220,
-
     "text-max-angle":40,
-
-    "text-rotation-alignment":
-    "map",
-
-    "text-keep-upright":
-    true,
-
-    "text-allow-overlap":
-    false,
-
-    "text-ignore-placement":
-    false
+    "text-rotation-alignment":"map",
+    "text-keep-upright":true,
+    "text-allow-overlap":false,
+    "text-ignore-placement":false
    },
 
    paint:{
-
-    "text-color":
-    "#fff",
-
-    "text-halo-color":
-    "rgba(15,18,20,.90)",
-
-    "text-halo-width":
-    2.2
+    "text-color":"#fff",
+    "text-halo-color":"rgba(15,18,20,.90)",
+    "text-halo-width":2.2
    }
   },
-
   before
  );
 }
 
 
-/* ==========================
+/* =====================================
+   FAA AIRPORT DATABASE
+   ===================================== */
+
+async function loadAirports(){
+
+ try{
+
+  const r=await fetch(
+   "./airports_snapshot.json",
+   {cache:"no-store"}
+  );
+
+  if(!r.ok){
+   throw new Error("airport snapshot missing");
+  }
+
+  const data=await r.json();
+
+  airportIndex=new Map();
+
+  for(const a of data.airports||[]){
+
+   /*
+   METARs normally use ICAO identifiers,
+   e.g. KTKI.
+
+   Index both ICAO and FAA identifiers so
+   this database is also ready for Route
+   Overview later.
+   */
+
+   if(a.icao){
+    airportIndex.set(
+     String(a.icao).toUpperCase(),
+     a
+    );
+   }
+
+   if(a.faa){
+    airportIndex.set(
+     String(a.faa).toUpperCase(),
+     a
+    );
+   }
+  }
+
+  console.log(
+   `FAA airports ready: ${airportIndex.size.toLocaleString()} identifiers`
+  );
+
+  /*
+  Airport names arrived after the METAR
+  snapshot in some loads, so refresh the
+  METAR GeoJSON properties now.
+  */
+
+  refreshVisibleMetars();
+
+ }catch(e){
+
+  console.error(
+   "Airport snapshot:",
+   e
+  );
+ }
+}
+
+
+/* =====================================
    METAR DENSITY
-   ========================== */
-
-let densitySetting=7;
-
+   ===================================== */
 
 function milesPerPixelAtCenter(){
 
- const c=
-  map.getCenter();
-
- const p=
-  map.project(c);
+ const c=map.getCenter();
+ const p=map.project(c);
 
  const p2={
   x:p.x+100,
   y:p.y
  };
 
- const ll2=
-  map.unproject(p2);
+ const ll2=map.unproject(p2);
 
- const lat1=
-  c.lat*Math.PI/180;
-
- const lat2=
-  ll2.lat*Math.PI/180;
+ const lat1=c.lat*Math.PI/180;
+ const lat2=ll2.lat*Math.PI/180;
 
  const dLat=
-  (
-   ll2.lat-c.lat
-  )*Math.PI/180;
+  (ll2.lat-c.lat)*Math.PI/180;
 
  const dLon=
-  (
-   ll2.lng-c.lng
-  )*Math.PI/180;
+  (ll2.lng-c.lng)*Math.PI/180;
 
  const a=
   Math.sin(dLat/2)**2+
@@ -1576,17 +1115,22 @@ function milesPerPixelAtCenter(){
 }
 
 
+/*
+V15 restores the V13 behavior:
+
+slider 14 = TRUE ALL.
+
+No screen-cell thinning at the maximum.
+*/
+
 function cellPixels(){
 
- /*
- V14 keeps the existing density behavior.
-
- Maximum slider position can approach
- full station density.
- */
+ if(densitySetting>=14){
+  return 0;
+ }
 
  return Math.max(
-  5,
+  7,
   102-(densitySetting*7)
  );
 }
@@ -1604,26 +1148,66 @@ function flightPriority(cat){
 }
 
 
+/* =====================================
+   ADD AIRPORT COMMON NAME TO FEATURE
+   ===================================== */
+
+function displayFeature(f){
+
+ const p={
+  ...(f.properties||{})
+ };
+
+ const id=
+  String(p.id||"").toUpperCase();
+
+ const airport=
+  airportIndex.get(id);
+
+ if(airport){
+
+  p.city=
+   airport.city||"";
+
+  p.airportName=
+   airport.name||"";
+
+  /*
+  At close zoom the label layer can use
+  this prebuilt value directly.
+  */
+
+  p.longLabel=
+   airport.city
+   ? `${id}  ${airport.city}`
+   : id;
+
+ }else{
+
+  p.city="";
+  p.airportName="";
+  p.longLabel=id;
+ }
+
+ return {
+  ...f,
+  properties:p
+ };
+}
+
+
 function refreshVisibleMetars(){
 
- if(
-  !map.getSource(
-   "metars"
-  )
- ) return;
-
+ if(!map.getSource("metars")){
+  return;
+ }
 
  const all=
   metarData.features||[];
 
-
  if(!all.length){
 
-  map
-  .getSource(
-   "metars"
-  )
-  .setData({
+  map.getSource("metars").setData({
    type:"FeatureCollection",
    features:[]
   });
@@ -1631,52 +1215,35 @@ function refreshVisibleMetars(){
   return;
  }
 
-
  const b=
   map.getBounds();
 
-
  const candidates=
-  all.filter(
-   f=>{
+  all.filter(f=>{
 
-    const [
-     lon,
-     lat
-    ]=
+   const [lon,lat]=
     f.geometry.coordinates;
 
-    return (
-     lon>=b.getWest() &&
-     lon<=b.getEast() &&
-     lat>=b.getSouth() &&
-     lat<=b.getNorth()
-    );
-   }
-  );
+   return(
+    lon>=b.getWest() &&
+    lon<=b.getEast() &&
+    lat>=b.getSouth() &&
+    lat<=b.getNorth()
+   );
+  });
 
 
- const cell=
-  cellPixels();
+ const canvas=
+  map.getCanvas();
 
+ const visible=[];
 
- const cells=
-  new Map();
-
-
- for(
-  const f of candidates
- ){
+ for(const f of candidates){
 
   const p=
    map.project(
     f.geometry.coordinates
    );
-
-
-  const canvas=
-   map.getCanvas();
-
 
   if(
    p.x<0 ||
@@ -1687,168 +1254,164 @@ function refreshVisibleMetars(){
    continue;
   }
 
-
-  const cx=
-   Math.floor(
-    p.x/cell
-   );
-
-
-  const cy=
-   Math.floor(
-    p.y/cell
-   );
-
-
-  const key=
-   cx+","+cy;
-
-
-  const existing=
-   cells.get(key);
-
-
-  if(!existing){
-
-   cells.set(
-    key,
-    f
-   );
-
-   continue;
-  }
-
-
-  const np=
-   flightPriority(
-    f.properties?.cat
-   );
-
-
-  const ep=
-   flightPriority(
-    existing.properties?.cat
-   );
-
-
-  if(np>ep){
-
-   cells.set(
-    key,
-    f
-   );
-
-  }else if(np===ep){
-
-   const a=
-    String(
-     f.properties?.id||""
-    );
-
-
-   const z=
-    String(
-     existing.properties?.id||""
-    );
-
-
-   if(a<z){
-
-    cells.set(
-     key,
-     f
-    );
-   }
-  }
+  visible.push(f);
  }
 
 
- const selected=
-  [...cells.values()];
+ const cell=
+  cellPixels();
+
+ let selected;
 
 
- map
- .getSource(
-  "metars"
- )
- .setData({
-  type:"FeatureCollection",
-  features:selected
- });
+ /*
+ TRUE ALL MODE
+ */
+
+ if(cell===0){
+
+  selected=visible;
+
+ }else{
+
+  const cells=new Map();
+
+  for(const f of visible){
+
+   const p=
+    map.project(
+     f.geometry.coordinates
+    );
+
+   const cx=
+    Math.floor(p.x/cell);
+
+   const cy=
+    Math.floor(p.y/cell);
+
+   const key=
+    cx+","+cy;
+
+   const existing=
+    cells.get(key);
+
+   if(!existing){
+
+    cells.set(key,f);
+    continue;
+   }
+
+   /*
+   Preserve the most operationally
+   significant weather in a crowded cell.
+   */
+
+   const np=
+    flightPriority(
+     f.properties?.cat
+    );
+
+   const ep=
+    flightPriority(
+     existing.properties?.cat
+    );
+
+   if(np>ep){
+
+    cells.set(key,f);
+
+   }else if(np===ep){
+
+    const a=
+     String(
+      f.properties?.id||""
+     );
+
+    const z=
+     String(
+      existing.properties?.id||""
+     );
+
+    if(a<z){
+     cells.set(key,f);
+    }
+   }
+  }
+
+  selected=[
+   ...cells.values()
+  ];
+ }
 
 
- const total=
-  all.length;
+ /*
+ Add FAA airport common-name properties
+ only to the points actually being shown.
+ */
 
-
- const shown=
-  selected.length;
-
-
- document
- .getElementById(
-  "badge"
- )
- .textContent=
-  total
-  ?
-  `${shown.toLocaleString()} / ${total.toLocaleString()} METARS`
-  :
-  "NO METAR SNAPSHOT";
-
-
- document
- .getElementById(
-  "status"
- )
- .textContent=
-  total
-  ?
-  `Showing ${shown.toLocaleString()} of ${total.toLocaleString()} METARs`
-  :
-  "Run the GitHub METAR snapshot action";
-
-
- const spacingMiles=
-  Math.max(
-   1,
-
-   Math.round(
-    cell*
-    milesPerPixelAtCenter()
-   )
+ const display=
+  selected.map(
+   displayFeature
   );
 
 
- document
- .getElementById(
-  "densityValue"
- )
- .textContent=
-  `~${spacingMiles.toLocaleString()} mi spacing`;
+ map.getSource("metars").setData({
+  type:"FeatureCollection",
+  features:display
+ });
+
+
+ const total=all.length;
+ const shown=display.length;
+
+
+ document.getElementById("badge").textContent=
+  total
+  ? `${shown.toLocaleString()} / ${total.toLocaleString()} METARS`
+  : "NO METAR SNAPSHOT";
+
+
+ document.getElementById("status").textContent=
+  total
+  ? `Showing ${shown.toLocaleString()} of ${total.toLocaleString()} METARs`
+  : "Run the GitHub METAR snapshot action";
+
+
+ if(cell===0){
+
+  document.getElementById("densityValue").textContent=
+   "ALL";
+
+ }else{
+
+  const spacingMiles=
+   Math.max(
+    1,
+    Math.round(
+     cell*milesPerPixelAtCenter()
+    )
+   );
+
+  document.getElementById("densityValue").textContent=
+   `~${spacingMiles.toLocaleString()} mi spacing`;
+ }
 }
 
 
-/* ==========================
-   METARS
-   ========================== */
+/* =====================================
+   METAR LAYERS
+   ===================================== */
 
 function setMetars(gj){
 
  metarData=gj;
 
-
- if(
-  !map.getSource(
-   "metars"
-  )
- ){
+ if(!map.getSource("metars")){
 
   map.addSource(
    "metars",
    {
     type:"geojson",
-
     data:{
      type:"FeatureCollection",
      features:[]
@@ -1857,170 +1420,170 @@ function setMetars(gj){
   );
 
 
-  map.addLayer(
-   {
-    id:"metar-dots",
+  map.addLayer({
+   id:"metar-dots",
+   type:"circle",
+   source:"metars",
 
-    type:"circle",
+   paint:{
 
-    source:"metars",
+    /*
+    V15:
+    slightly larger again than V14.
+    */
 
-    paint:{
+    "circle-radius":[
+     "interpolate",
+     ["linear"],
+     ["zoom"],
+     2,4.4,
+     5,6.2,
+     8,7.8,
+     12,8.8
+    ],
 
-     /*
-     V14:
-     another noticeable increase
-     in dot size.
-     */
+    "circle-color":[
+     "match",
+     ["get","cat"],
+     "VFR",COLORS.VFR,
+     "MVFR",COLORS.MVFR,
+     "IFR",COLORS.IFR,
+     "LIFR",COLORS.LIFR,
+     COLORS.UNKNOWN
+    ],
 
-     "circle-radius":[
-      "interpolate",
-      ["linear"],
-      ["zoom"],
+    "circle-stroke-color":
+     "rgba(255,255,255,.90)",
 
-      2,4.0,
+    "circle-stroke-width":[
+     "interpolate",
+     ["linear"],
+     ["zoom"],
+     2,.75,
+     7,1.35,
+     12,1.65
+    ],
 
-      5,5.7,
-
-      8,7.2,
-
-      12,8.2
-     ],
-
-
-     "circle-color":[
-      "match",
-      ["get","cat"],
-
-      "VFR",
-      COLORS.VFR,
-
-      "MVFR",
-      COLORS.MVFR,
-
-      "IFR",
-      COLORS.IFR,
-
-      "LIFR",
-      COLORS.LIFR,
-
-      COLORS.UNKNOWN
-     ],
-
-
-     "circle-stroke-color":
-     "rgba(255,255,255,.88)",
-
-
-     "circle-stroke-width":[
-      "interpolate",
-      ["linear"],
-      ["zoom"],
-
-      2,.7,
-
-      7,1.3,
-
-      12,1.6
-     ],
-
-
-     "circle-opacity":
-     .97
-    }
+    "circle-opacity":.97
    }
-  );
+  });
 
 
-  map.addLayer(
-   {
-    id:"metar-labels",
+  /*
+  INTERMEDIATE ZOOM:
+  ICAO identifier only.
+  */
 
-    type:"symbol",
+  map.addLayer({
+   id:"metar-labels",
+   type:"symbol",
+   source:"metars",
+   minzoom:5.8,
+   maxzoom:9.2,
 
-    source:"metars",
+   layout:{
 
-    minzoom:5.8,
+    "text-field":[
+     "get",
+     "id"
+    ],
 
-    layout:{
+    "text-size":[
+     "interpolate",
+     ["linear"],
+     ["zoom"],
+     5.8,9,
+     7.2,10,
+     9.2,11
+    ],
 
-     "text-field":[
-      "get",
-      "id"
-     ],
+    "text-offset":[
+     1.05,
+     0
+    ],
 
+    "text-anchor":"left",
+    "text-optional":true,
+    "text-allow-overlap":false,
+    "text-ignore-placement":false,
 
-     /*
-     Keep the ICAO identifier
-     subordinate to the larger dot.
-     */
+    "symbol-sort-key":[
+     "match",
+     ["get","cat"],
+     "LIFR",0,
+     "IFR",1,
+     "MVFR",2,
+     "VFR",3,
+     4
+    ]
+   },
 
-     "text-size":[
-      "interpolate",
-      ["linear"],
-      ["zoom"],
-
-      5.8,9,
-
-      7.2,10,
-
-      9,11,
-
-      12,12
-     ],
-
-
-     "text-offset":[
-      1.0,
-      0
-     ],
-
-
-     "text-anchor":
-     "left",
-
-
-     "text-optional":
-     true,
-
-
-     "text-allow-overlap":
-     false,
-
-
-     "text-ignore-placement":
-     false,
-
-
-     "symbol-sort-key":[
-      "match",
-      ["get","cat"],
-
-      "LIFR",0,
-      "IFR",1,
-      "MVFR",2,
-      "VFR",3,
-
-      4
-     ]
-    },
-
-
-    paint:{
-
-     "text-color":
-     "#fff",
-
-
-     "text-halo-color":
-     "#111",
-
-
-     "text-halo-width":
-     1.8
-    }
+   paint:{
+    "text-color":"#fff",
+    "text-halo-color":"#111",
+    "text-halo-width":1.8
    }
-  );
+  });
+
+
+  /*
+  CLOSE ZOOM:
+  ICAO + FAA municipality/common name
+
+  Example:
+  KTKI  McKinney
+  KADS  Addison
+  */
+
+  map.addLayer({
+   id:"metar-long-labels",
+   type:"symbol",
+   source:"metars",
+   minzoom:9.2,
+
+   layout:{
+
+    "text-field":[
+     "get",
+     "longLabel"
+    ],
+
+    "text-size":[
+     "interpolate",
+     ["linear"],
+     ["zoom"],
+     9.2,11,
+     12,12,
+     16,14
+    ],
+
+    "text-offset":[
+     1.05,
+     0
+    ],
+
+    "text-anchor":"left",
+    "text-optional":true,
+    "text-allow-overlap":false,
+    "text-ignore-placement":false,
+
+    "symbol-sort-key":[
+     "match",
+     ["get","cat"],
+     "LIFR",0,
+     "IFR",1,
+     "MVFR",2,
+     "VFR",3,
+     4
+    ]
+   },
+
+   paint:{
+    "text-color":"#fff",
+    "text-halo-color":"#111",
+    "text-halo-width":2
+   }
+  });
 
 
   map.on(
@@ -2028,10 +1591,7 @@ function setMetars(gj){
    "metar-dots",
    e=>{
 
-    if(
-     e.features?.[0]
-    ){
-
+    if(e.features?.[0]){
      showMetar(
       e.features[0].properties
      );
@@ -2040,35 +1600,28 @@ function setMetars(gj){
   );
  }
 
-
  refreshVisibleMetars();
 }
 
 
-/* ==========================
-   SNAPSHOT LOAD
-   ========================== */
+/* =====================================
+   LOAD METAR SNAPSHOT
+   ===================================== */
 
 async function loadSnapshot(){
 
  try{
 
-  const r=
-   await fetch(
-    "./metars_snapshot.json",
-    {
-     cache:"no-store"
-    }
-   );
-
+  const r=await fetch(
+   "./metars_snapshot.json",
+   {cache:"no-store"}
+  );
 
   if(!r.ok){
-
    throw new Error(
     "snapshot missing"
    );
   }
-
 
   setMetars(
    await r.json()
@@ -2084,34 +1637,27 @@ async function loadSnapshot(){
 }
 
 
-/* ==========================
+/* =====================================
    AIRSPACE
-   ========================== */
+   ===================================== */
 
 async function addAirspace(){
 
  try{
 
-  const r=
-   await fetch(
-    "./airspace_snapshot.json",
-    {
-     cache:"no-store"
-    }
-   );
-
+  const r=await fetch(
+   "./airspace_snapshot.json",
+   {cache:"no-store"}
+  );
 
   if(!r.ok){
-
    throw new Error(
     "airspace snapshot missing"
    );
   }
 
-
   const gj=
    await r.json();
-
 
   const features=
    gj.features||[];
@@ -2129,9 +1675,7 @@ async function addAirspace(){
   map.addLayer(
    {
     id:"air-fill",
-
     type:"fill",
-
     source:"faa-air",
 
     layout:{
@@ -2143,24 +1687,15 @@ async function addAirspace(){
      "fill-color":[
       "match",
       ["get","CLASS"],
-
-      "B",
-      "#ff2d55",
-
-      "C",
-      "#bf5af2",
-
-      "D",
-      "#0a84ff",
-
+      "B","#ff2d55",
+      "C","#bf5af2",
+      "D","#0a84ff",
       "#999"
      ],
 
-     "fill-opacity":
-     .045
+     "fill-opacity":.045
     }
    },
-
    "metar-dots"
   );
 
@@ -2168,9 +1703,7 @@ async function addAirspace(){
   map.addLayer(
    {
     id:"air-line",
-
     type:"line",
-
     source:"faa-air",
 
     layout:{
@@ -2182,183 +1715,137 @@ async function addAirspace(){
      "line-color":[
       "match",
       ["get","CLASS"],
-
-      "B",
-      "#ff2d55",
-
-      "C",
-      "#bf5af2",
-
-      "D",
-      "#0a84ff",
-
+      "B","#ff2d55",
+      "C","#bf5af2",
+      "D","#0a84ff",
       "#999"
      ],
-
 
      "line-width":[
       "interpolate",
       ["linear"],
       ["zoom"],
-
       3,1.15,
-
       7,2.4
      ],
 
-
-     "line-opacity":
-     .88
+     "line-opacity":.88
     }
    },
-
    "metar-dots"
   );
 
 
   airReady=true;
 
-
-  document
-  .getElementById(
-   "airmsg"
-  )
-  .textContent=
+  document.getElementById("airmsg").textContent=
    `FAA airspace ready (${features.length.toLocaleString()} polygons)`;
-
 
  }catch(e){
 
   console.error(e);
 
-
-  document
-  .getElementById(
-   "airmsg"
-  )
-  .textContent=
+  document.getElementById("airmsg").textContent=
    "Run the FAA airspace snapshot action";
  }
 }
 
 
-/* ==========================
+/* =====================================
    MAP LOAD
-   ========================== */
+   ===================================== */
 
 map.on(
  "load",
  async()=>{
 
-  /*
-  Remove Liberty road clutter before
-  inserting V14 controlled road layers.
-  */
-
   suppressBuiltInRoads();
 
-
-  addSatellite();
-
+  addBasemapLayers();
 
   setMetars({
    type:"FeatureCollection",
    features:[]
   });
 
-
   await Promise.all([
    loadSnapshot(),
+   loadAirports(),
    addAirspace()
   ]);
 
+  /*
+  One final refresh guarantees the airport
+  common names have been joined regardless
+  of which fetch finished first.
+  */
+
+  refreshVisibleMetars();
 
   fitCONUS();
  }
 );
 
 
-/* ==========================
+/* =====================================
    BASEMAP SWITCHING
-   ========================== */
+   ===================================== */
 
 function setBase(which){
 
- document
- .querySelectorAll(
+ document.querySelectorAll(
   "[data-base]"
- )
- .forEach(
-  b=>
-   b.classList.toggle(
-    "active",
-    b.dataset.base===which
-   )
+ ).forEach(
+  b=>b.classList.toggle(
+   "active",
+   b.dataset.base===which
+  )
  );
 
 
- if(
-  map.getLayer(
-   "satellite"
-  )
- ){
+ if(map.getLayer("satellite")){
 
   map.setPaintProperty(
    "satellite",
    "raster-opacity",
-   which==="sat"
-   ?1
-   :0
+   which==="sat" ? 1 : 0
   );
  }
 
 
- if(
-  map.getLayer(
-   "terrain-physical"
-  )
- ){
+ if(map.getLayer("terrain-physical")){
 
   map.setPaintProperty(
    "terrain-physical",
    "raster-opacity",
-   which==="terrain"
-   ?1
-   :0
+   which==="terrain" ? 1 : 0
   );
  }
 }
 
 
-document
-.querySelectorAll(
+document.querySelectorAll(
  "[data-base]"
-)
-.forEach(
- b=>
-  b.onclick=
-   ()=>setBase(
-    b.dataset.base
-   )
+).forEach(
+ b=>b.onclick=
+  ()=>setBase(
+   b.dataset.base
+  )
 );
 
 
-/* ==========================
-   DENSITY CONTROL
-   ========================== */
+/* =====================================
+   DENSITY
+   ===================================== */
 
-document
-.getElementById(
+document.getElementById(
  "density"
-)
-.addEventListener(
+).addEventListener(
  "input",
  e=>{
 
   densitySetting=
-   Number(
-    e.target.value
-   );
+   Number(e.target.value);
 
   refreshVisibleMetars();
  }
@@ -2371,131 +1858,97 @@ map.on(
 );
 
 
-/* ==========================
+/* =====================================
    UI
-   ========================== */
+   ===================================== */
 
-document
-.getElementById(
+document.getElementById(
  "layerToggle"
-)
-.onclick=
- ()=>{
+).onclick=()=>{
 
-  const p=
-   document.getElementById(
-    "layers"
-   );
+ const p=
+  document.getElementById(
+   "layers"
+  );
 
-
-  p.style.display=
-   p.style.display==="block"
-   ?
-   "none"
-   :
-   "block";
- };
+ p.style.display=
+  p.style.display==="block"
+  ? "none"
+  : "block";
+};
 
 
-document
-.getElementById(
+document.getElementById(
  "plus"
-)
-.onclick=
- ()=>map.easeTo({
-  zoom:map.getZoom()+1,
-  duration:200
- });
+).onclick=()=>map.easeTo({
+ zoom:map.getZoom()+1,
+ duration:200
+});
 
 
-document
-.getElementById(
+document.getElementById(
  "minus"
-)
-.onclick=
- ()=>map.easeTo({
-  zoom:map.getZoom()-1,
-  duration:200
- });
+).onclick=()=>map.easeTo({
+ zoom:map.getZoom()-1,
+ duration:200
+});
 
 
-document
-.getElementById(
+document.getElementById(
  "home"
-)
-.onclick=
- fitCONUS;
+).onclick=fitCONUS;
 
 
-/* ==========================
+/* =====================================
    AIRSPACE BUTTON
-   ========================== */
+   ===================================== */
 
-document
-.getElementById(
+document.getElementById(
  "airspaceBtn"
-)
-.onclick=
- ()=>{
+).onclick=()=>{
 
-  if(!airReady){
-   return;
-  }
+ if(!airReady){
+  return;
+ }
 
+ airOn=!airOn;
 
-  airOn=
-   !airOn;
+ const v=
+  airOn
+  ? "visible"
+  : "none";
 
+ map.setLayoutProperty(
+  "air-fill",
+  "visibility",
+  v
+ );
 
-  const v=
-   airOn
-   ?
-   "visible"
-   :
-   "none";
+ map.setLayoutProperty(
+  "air-line",
+  "visibility",
+  v
+ );
 
-
-  map.setLayoutProperty(
-   "air-fill",
-   "visibility",
-   v
+ const b=
+  document.getElementById(
+   "airspaceBtn"
   );
 
+ b.textContent=
+  "Airspace: "+
+  (airOn ? "ON" : "OFF");
 
-  map.setLayoutProperty(
-   "air-line",
-   "visibility",
-   v
-  );
-
-
-  const b=
-   document.getElementById(
-    "airspaceBtn"
-   );
+ b.classList.toggle(
+  "active",
+  airOn
+ );
+};
 
 
-  b.textContent=
-   "Airspace: "+
-   (
-    airOn
-    ?
-    "ON"
-    :
-    "OFF"
-   );
-
-
-  b.classList.toggle(
-   "active",
-   airOn
-  );
- };
-
-
-/* ==========================
+/* =====================================
    POPUP
-   ========================== */
+   ===================================== */
 
 function ageText(epoch){
 
@@ -2503,11 +1956,9 @@ function ageText(epoch){
   return "—";
  }
 
-
  const mins=
   Math.max(
    0,
-
    Math.round(
     (
      Date.now()/1000-
@@ -2516,96 +1967,77 @@ function ageText(epoch){
    )
   );
 
-
  return mins<60
-  ?
-  `${mins} min`
-  :
-  `${Math.floor(mins/60)}h ${mins%60}m`;
+  ? `${mins} min`
+  : `${Math.floor(mins/60)}h ${mins%60}m`;
 }
 
 
 function showMetar(p){
 
- document
- .getElementById(
+ document.getElementById(
   "popup"
- )
- .style.display=
+ ).style.display=
   "block";
 
 
- document
- .getElementById(
+ document.getElementById(
   "ptitle"
- )
- .innerHTML=
+ ).innerHTML=
   `${p.id||"—"} <span style="color:${COLORS[p.cat]||COLORS.UNKNOWN};font-size:16px">${p.cat||"UNKNOWN"}</span>`;
 
 
- document
- .getElementById(
+ /*
+ Prefer the FAA full airport name.
+
+ Fall back to whatever name was already
+ contained in the METAR snapshot.
+ */
+
+ document.getElementById(
   "pname"
- )
- .textContent=
-  p.name||"";
+ ).textContent=
+  p.airportName ||
+  p.name ||
+  p.city ||
+  "";
 
 
- document
- .getElementById(
+ document.getElementById(
   "wind"
- )
- .textContent=
+ ).textContent=
   p.wind||"—";
 
-
- document
- .getElementById(
+ document.getElementById(
   "vis"
- )
- .textContent=
+ ).textContent=
   p.vis||"—";
 
-
- document
- .getElementById(
+ document.getElementById(
   "ceil"
- )
- .textContent=
+ ).textContent=
   p.ceil||"—";
 
-
- document
- .getElementById(
+ document.getElementById(
   "alt"
- )
- .textContent=
+ ).textContent=
   p.alt||"—";
 
-
- document
- .getElementById(
+ document.getElementById(
   "temp"
- )
- .textContent=
+ ).textContent=
   p.temp||"—";
 
-
- document
- .getElementById(
+ document.getElementById(
   "age"
- )
- .textContent=
+ ).textContent=
   ageText(
    p.obsEpoch
   );
 
-
- document
- .getElementById(
+ document.getElementById(
   "raw"
- )
- .textContent=
+ ).textContent=
   p.raw||"";
 }
 
@@ -2617,46 +2049,34 @@ map.on(
  e=>{
 
   if(
-   map.getLayer(
-    "metar-dots"
-   )
-   &&
-   !map
-   .queryRenderedFeatures(
+   map.getLayer("metar-dots") &&
+   !map.queryRenderedFeatures(
     e.point,
     {
      layers:[
       "metar-dots"
      ]
     }
-   )
-   .length
+   ).length
   ){
 
-   document
-   .getElementById(
+   document.getElementById(
     "popup"
-   )
-   .style.display=
+   ).style.display=
     "none";
   }
  }
 );
 
 
-document
-.getElementById(
+document.getElementById(
  "close"
-)
-.onclick=
- ()=>document
- .getElementById(
+).onclick=
+ ()=>document.getElementById(
   "popup"
- )
- .style.display=
+ ).style.display=
   "none";
 
 </script>
-
 </body>
 </html>
