@@ -3,38 +3,47 @@ name: Build aviation snapshots
 on:
   workflow_dispatch:
 
+  schedule:
+    # METARs are handled frequently; airport data changes much less often.
+    # This weekly run is enough to pick up each new FAA NASR cycle automatically.
+    - cron: "17 8 * * 1"
+
 permissions:
   contents: write
 
 jobs:
-  snapshot:
+  build:
     runs-on: ubuntu-latest
 
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
 
-      - name: Download current AWC METAR cache
-        run: |
-          curl --fail --retry 3 \
-            --user-agent "METAR-touch/1.0 GitHub Action" \
-            https://aviationweather.gov/data/cache/metars.cache.csv.gz \
-            -o metars.cache.csv.gz
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
 
-      - name: Convert METARs to browser GeoJSON
-        run: |
-          python3 scripts/update_metar.py \
-            metars.cache.csv.gz \
-            metars_snapshot.json
+      - name: Update METAR snapshot
+        run: python scripts/update_metar.py
 
-      - name: Download FAA B/C/D airspace
-        run: python3 scripts/update_airspace.py
+      - name: Update FAA airspace snapshot
+        run: python scripts/update_airspace.py
 
-      - name: Commit snapshots
+      - name: Update FAA airport snapshot
+        run: python scripts/update_airports.py
+
+      - name: Commit updated snapshots
         run: |
-          git config user.name "METAR-touch updater"
-          git config user.email "actions@users.noreply.github.com"
-          git add metars_snapshot.json airspace_snapshot.json
-          git diff --cached --quiet && exit 0
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add metars_snapshot.json airspace_snapshot.json airports_snapshot.json
+
+          if git diff --cached --quiet; then
+            echo "No snapshot changes."
+            exit 0
+          fi
+
           git commit -m "Update aviation snapshots"
           git push
