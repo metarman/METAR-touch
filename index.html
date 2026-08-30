@@ -1,1 +1,463 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>METAR-touch v13</title>
+<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@6.6.0/dist/maplibre-gl.css">
+<style>
+*{box-sizing:border-box}html,body,#app,#map{margin:0;width:100%;height:100%;overflow:hidden}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#0d1014;color:#fff}
+#app{position:fixed;inset:0}#map{position:absolute;inset:0}
+#top{position:absolute;z-index:20;top:max(12px,env(safe-area-inset-top));left:12px;right:12px;display:flex;gap:8px;align-items:center;pointer-events:none}
+.pill{background:rgba(15,18,22,.94);border:1px solid #44505c;border-radius:12px;padding:9px 12px;backdrop-filter:blur(9px)}
+#title{font-size:18px;font-weight:760}#badge{font-size:13px;color:#ffcc66}
+#controls{margin-left:auto;display:flex;gap:7px;pointer-events:auto}
+.ctrl{height:46px;min-width:48px;padding:0 14px;border:1px solid #4b5661;border-radius:12px;background:rgba(18,22,27,.96);color:#fff;font-size:15px;font-weight:600}
+#layers{position:absolute;z-index:24;top:72px;right:12px;width:230px;display:none;background:rgba(18,22,27,.97);border:1px solid #4b5661;border-radius:14px;padding:10px}
+.row{display:flex;gap:7px;margin-bottom:8px}.row:last-child{margin-bottom:0}
+.layerbtn{flex:1;min-height:42px;border:1px solid #4b5661;border-radius:10px;background:#222831;color:#fff;font-size:13px}
+.layerbtn.active{outline:2px solid #0a84ff;background:#273342}
+#airmsg{font-size:11px;color:#b9c0c7;margin-top:7px}
+#densityWrap{border-top:1px solid #3c4650;margin-top:9px;padding-top:9px}
+#densityHead{display:flex;justify-content:space-between;gap:10px;font-size:12px;color:#d3d9df;margin-bottom:6px}
+#densityValue{color:#ffcc66;font-variant-numeric:tabular-nums}
+#density{width:100%;accent-color:#0a84ff}
+#densityNote{font-size:10px;color:#929ba4;margin-top:4px}
+#legend{position:absolute;z-index:20;left:12px;bottom:max(24px,env(safe-area-inset-bottom));background:rgba(15,18,22,.94);border:1px solid #44505c;border-radius:12px;padding:9px 11px;font-size:12px}
+#legend span{margin-right:11px;white-space:nowrap}.key{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:4px}
+#status{position:absolute;z-index:20;right:12px;bottom:max(24px,env(safe-area-inset-bottom));background:rgba(15,18,22,.94);border:1px solid #44505c;border-radius:12px;padding:9px 11px;font-size:12px;color:#d0d6dc}
+#popup{display:none;position:absolute;z-index:30;right:16px;top:128px;width:min(410px,88vw);background:rgba(19,23,28,.985);border:1px solid #59636d;border-radius:16px;padding:18px;box-shadow:0 10px 34px rgba(0,0,0,.55)}
+#close{position:absolute;right:9px;top:9px;width:44px;height:44px;border-radius:50%;border:1px solid #525b64;background:#24292f;color:#fff;font-size:26px}
+#ptitle{font-size:23px;font-weight:760;padding-right:50px}#pname{color:#aeb7c0;margin-top:2px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:11px 18px;margin-top:15px}.k{font-size:11px;color:#aeb7c0;text-transform:uppercase}.v{font-size:15px;margin-top:2px}
+#raw{margin-top:14px;padding-top:12px;border-top:1px solid #343b43;font:12px/1.4 ui-monospace,SFMono-Regular,Menlo,monospace;color:#d5d9dd}
+@media(max-width:700px){#top{left:8px;right:8px}#layers{right:8px}#legend{left:8px;bottom:22px;font-size:11px}#status{display:none}#badge{display:none}}
+</style></head>
+<body><div id="app"><div id="map"></div>
+<div id="top"><div id="title" class="pill">METAR-touch v13</div><div id="badge" class="pill">LOADING METARS</div>
+<div id="controls"><button class="ctrl" id="minus">−</button><button class="ctrl" id="home">CONUS</button><button class="ctrl" id="plus">+</button><button class="ctrl" id="layerToggle">LAYERS</button></div></div>
+<div id="layers">
+ <div class="row"><button class="layerbtn active" data-base="road">Map</button><button class="layerbtn" data-base="terrain">Terrain</button><button class="layerbtn" data-base="sat">Satellite</button></div>
+ <div class="row"><button class="layerbtn" id="airspaceBtn">Airspace: OFF</button></div>
+ <div id="airmsg">FAA B/C/D loading…</div>
+ <div id="densityWrap">
+   <div id="densityHead"><span>METAR density</span><span id="densityValue">~45 mi spacing</span></div>
+   <input id="density" type="range" min="1" max="14" step="1" value="7">
+   <div id="densityNote">Screen density. Zooming in automatically reveals more stations.</div>
+ </div>
+</div>
+<div id="legend"><span><i class="key" style="background:#35c759"></i>VFR</span><span><i class="key" style="background:#0a84ff"></i>MVFR</span><span><i class="key" style="background:#ff453a"></i>IFR</span><span><i class="key" style="background:#bf5af2"></i>LIFR</span></div>
+<div id="status">METAR snapshot: loading…</div>
+<div id="popup"><button id="close">×</button><div id="ptitle"></div><div id="pname"></div>
+<div class="grid"><div><div class="k">Wind</div><div id="wind" class="v"></div></div><div><div class="k">Visibility</div><div id="vis" class="v"></div></div><div><div class="k">Ceiling</div><div id="ceil" class="v"></div></div><div><div class="k">Altimeter</div><div id="alt" class="v"></div></div><div><div class="k">Temp / Dew</div><div id="temp" class="v"></div></div><div><div class="k">Age</div><div id="age" class="v"></div></div></div><div id="raw"></div></div>
+</div>
 
+<script type="module">
+import * as maplibregl from 'https://unpkg.com/maplibre-gl@6.6.0/dist/maplibre-gl.mjs';
+
+const COLORS={VFR:"#35c759",MVFR:"#0a84ff",IFR:"#ff453a",LIFR:"#bf5af2",UNKNOWN:"#8e8e93"};
+const CONUS=[[-126.5,22.4],[-65.3,50.4]];
+let metarData={type:"FeatureCollection",features:[]}, airOn=false, airReady=false;
+
+const map=new maplibregl.Map({
+ container:"map",
+ style:"https://tiles.openfreemap.org/styles/liberty",
+ center:[-96,38],zoom:3.2,minZoom:1.2,maxZoom:13,
+ attributionControl:true,dragRotate:false,pitchWithRotate:false,maxPitch:0,touchPitch:false
+});
+map.touchZoomRotate.disableRotation();
+
+function fitCONUS(){map.fitBounds(CONUS,{padding:{top:90,bottom:72,left:58,right:58},duration:450,maxZoom:4.2})}
+function firstSymbol(){const x=(map.getStyle().layers||[]).find(l=>l.type==="symbol");return x&&x.id}
+
+function addSatellite(){
+ const before=firstSymbol();
+
+ map.addSource("satellite",{
+  type:"raster",
+  tiles:["https://tiles.maps.eox.at/wmts/1.0.0/s2cloudless-2020_3857/default/g/{z}/{y}/{x}.jpg"],
+  tileSize:256,
+  attribution:"Sentinel-2 cloudless — EOX"
+ });
+ map.addLayer({
+  id:"satellite",
+  type:"raster",
+  source:"satellite",
+  paint:{"raster-opacity":0}
+ },before);
+
+ // V11 terrain: Natural Earth II physical relief.
+ // This is colored physical geography, not a white hillshade.
+ map.addSource("terrain-physical",{
+  type:"raster",
+  tiles:["https://tiles.openfreemap.org/natural_earth/ne2sr/{z}/{x}/{y}.png"],
+  tileSize:256,
+  maxzoom:6,
+  attribution:"Natural Earth / OpenFreeMap"
+ });
+ map.addLayer({
+  id:"terrain-physical",
+  type:"raster",
+  source:"terrain-physical",
+  paint:{
+   "raster-opacity":0,
+   "raster-saturation":0.12,
+   "raster-contrast":0.08
+  }
+ },before);
+
+ // Explicit state/country boundaries at national zoom.
+ // Liberty normally does not show state boundaries until much farther in.
+ map.addLayer({
+  id:"country-border-casing",
+  type:"line",
+  source:"openmaptiles",
+  "source-layer":"boundary",
+  filter:["all",
+    ["==",["get","admin_level"],2],
+    ["!=",["get","maritime"],1]
+  ],
+  paint:{
+   "line-color":"rgba(255,255,255,0.82)",
+   "line-width":["interpolate",["linear"],["zoom"],2,3.0,6,4.0],
+   "line-opacity":0.9
+  }
+ },before);
+ map.addLayer({
+  id:"country-border-v11",
+  type:"line",
+  source:"openmaptiles",
+  "source-layer":"boundary",
+  filter:["all",
+    ["==",["get","admin_level"],2],
+    ["!=",["get","maritime"],1]
+  ],
+  paint:{
+   "line-color":"#3d4752",
+   "line-width":["interpolate",["linear"],["zoom"],2,1.4,6,2.0],
+   "line-opacity":0.95
+  }
+ },before);
+
+ map.addLayer({
+  id:"state-border-casing",
+  type:"line",
+  source:"openmaptiles",
+  "source-layer":"boundary",
+  filter:["all",
+    ["==",["get","admin_level"],4],
+    ["!=",["get","maritime"],1]
+  ],
+  paint:{
+   "line-color":"rgba(255,255,255,0.78)",
+   "line-width":["interpolate",["linear"],["zoom"],2,2.3,6,3.1],
+   "line-opacity":0.88
+  }
+ },before);
+ map.addLayer({
+  id:"state-border-v11",
+  type:"line",
+  source:"openmaptiles",
+  "source-layer":"boundary",
+  filter:["all",
+    ["==",["get","admin_level"],4],
+    ["!=",["get","maritime"],1]
+  ],
+  paint:{
+   "line-color":"#66727d",
+   "line-width":["interpolate",["linear"],["zoom"],2,1.05,6,1.55],
+   "line-dasharray":[3,2],
+   "line-opacity":0.96
+  }
+ },before);
+
+ // V12: restrained major-road overlay for Terrain mode.
+ map.addLayer({
+  id:"terrain-major-roads-casing",
+  type:"line",
+  source:"openmaptiles",
+  "source-layer":"transportation",
+  minzoom:4.0,
+  layout:{visibility:"none"},
+  filter:["match",["get","class"],["motorway","trunk","primary"],true,false],
+  paint:{
+   "line-color":"rgba(255,255,255,0.88)",
+   "line-width":["interpolate",["linear"],["zoom"],4,1.6,7,3.3,10,5.2],
+   "line-opacity":0.88
+  }
+ },before);
+
+ map.addLayer({
+  id:"terrain-major-roads",
+  type:"line",
+  source:"openmaptiles",
+  "source-layer":"transportation",
+  minzoom:4.0,
+  layout:{visibility:"none"},
+  filter:["match",["get","class"],["motorway","trunk","primary"],true,false],
+  paint:{
+   "line-color":["match",["get","class"],
+     "motorway","#d9a441",
+     "trunk","#d8b46a",
+     "primary","#d5c28a",
+     "#c9b98e"
+   ],
+   "line-width":["interpolate",["linear"],["zoom"],4,0.8,7,1.7,10,2.8],
+   "line-opacity":0.92
+  }
+ },before);
+
+ map.addLayer({
+  id:"terrain-highway-shields",
+  type:"symbol",
+  source:"openmaptiles",
+  "source-layer":"transportation_name",
+  minzoom:4.8,
+  maxzoom:10.5,
+  layout:{
+   visibility:"none",
+   "symbol-placement":"line",
+   "text-field":["coalesce",["get","ref"],""],
+   "text-size":["interpolate",["linear"],["zoom"],4.8,10,8,12],
+   "symbol-spacing":190,
+   "text-rotation-alignment":"map",
+   "text-keep-upright":true,
+   "text-allow-overlap":false
+  },
+  filter:["all",
+    ["has","ref"],
+    ["match",["get","class"],["motorway","trunk","primary"],true,false]
+  ],
+  paint:{
+   "text-color":"#383838",
+   "text-halo-color":"rgba(255,255,255,0.92)",
+   "text-halo-width":2
+  }
+ },before);
+
+ // More useful highway labeling at regional zoom, but no road-name clutter in cities.
+ for(const l of map.getStyle().layers||[]){
+  if(l.type!=="symbol" || l["source-layer"]!=="transportation_name") continue;
+  try{
+   if(l.id.includes("highway-shield")){
+    map.setLayerZoomRange(l.id,4.5,9.5);
+   }else{
+    map.setLayerZoomRange(l.id,6.0,9.5);
+   }
+  }catch(e){}
+ }
+}
+let densitySetting=7;
+
+function milesPerPixelAtCenter(){
+ const c=map.getCenter();
+ const p=map.project(c);
+ const p2={x:p.x+100,y:p.y};
+ const ll2=map.unproject(p2);
+ const lat1=c.lat*Math.PI/180, lat2=ll2.lat*Math.PI/180;
+ const dLat=(ll2.lat-c.lat)*Math.PI/180;
+ const dLon=(ll2.lng-c.lng)*Math.PI/180;
+ const a=Math.sin(dLat/2)**2+
+   Math.cos(lat1)*Math.cos(lat2)*Math.sin(dLon/2)**2;
+ const miles=3958.7613*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+ return miles/100;
+}
+
+function cellPixels(){
+ // Higher slider value = denser screen.
+ return 102-(densitySetting*7); // V12 denser default
+}
+
+function flightPriority(cat){
+ return ({LIFR:4,IFR:3,MVFR:2,VFR:1,UNKNOWN:0})[cat] ?? 0;
+}
+
+function refreshVisibleMetars(){
+ if(!map.getSource("metars"))return;
+
+ const all=metarData.features||[];
+ if(!all.length){
+  map.getSource("metars").setData({type:"FeatureCollection",features:[]});
+  return;
+ }
+
+ const b=map.getBounds();
+ const candidates=all.filter(f=>{
+  const [lon,lat]=f.geometry.coordinates;
+  return lon>=b.getWest() && lon<=b.getEast() &&
+         lat>=b.getSouth() && lat<=b.getNorth();
+ });
+
+ const cell=cellPixels();
+ const cells=new Map();
+
+ for(const f of candidates){
+  const p=map.project(f.geometry.coordinates);
+
+  // Only consider points actually inside the visible canvas.
+  const canvas=map.getCanvas();
+  if(p.x<0 || p.y<0 || p.x>canvas.clientWidth || p.y>canvas.clientHeight) continue;
+
+  const cx=Math.floor(p.x/cell);
+  const cy=Math.floor(p.y/cell);
+  const key=cx+","+cy;
+  const existing=cells.get(key);
+
+  if(!existing){
+   cells.set(key,f);
+   continue;
+  }
+
+  // Preserve the most operationally significant weather in each screen cell.
+  const np=flightPriority(f.properties?.cat);
+  const ep=flightPriority(existing.properties?.cat);
+
+  if(np>ep){
+   cells.set(key,f);
+  }else if(np===ep){
+   const a=String(f.properties?.id||"");
+   const z=String(existing.properties?.id||"");
+   if(a<z) cells.set(key,f);
+  }
+ }
+
+ const selected=[...cells.values()];
+ map.getSource("metars").setData({type:"FeatureCollection",features:selected});
+
+ const total=all.length;
+ const shown=selected.length;
+ document.getElementById("badge").textContent=
+   total ? `${shown.toLocaleString()} / ${total.toLocaleString()} METARS` : "NO METAR SNAPSHOT";
+
+ document.getElementById("status").textContent=
+   total ? `Showing ${shown.toLocaleString()} of ${total.toLocaleString()} METARs` : "Run the GitHub METAR snapshot action";
+
+ const spacingMiles=Math.max(1,Math.round(cell*milesPerPixelAtCenter()));
+ document.getElementById("densityValue").textContent=
+   `~${spacingMiles.toLocaleString()} mi spacing`;
+}
+function setMetars(gj){
+ metarData=gj;
+
+ if(!map.getSource("metars")){
+  map.addSource("metars",{type:"geojson",data:{type:"FeatureCollection",features:[]}});
+  map.addLayer({id:"metar-dots",type:"circle",source:"metars",
+   paint:{
+    "circle-radius":["interpolate",["linear"],["zoom"],2,2.6,5,4.0,8,5.2],
+    "circle-color":["match",["get","cat"],"VFR",COLORS.VFR,"MVFR",COLORS.MVFR,"IFR",COLORS.IFR,"LIFR",COLORS.LIFR,COLORS.UNKNOWN],
+    "circle-stroke-color":"rgba(255,255,255,.84)",
+    "circle-stroke-width":["interpolate",["linear"],["zoom"],2,.55,7,1.2],
+    "circle-opacity":.96
+   }});
+  map.addLayer({
+    id:"metar-labels",
+    type:"symbol",
+    source:"metars",
+    minzoom:5.8,
+    layout:{
+      "text-field":["get","id"],
+      "text-size":["interpolate",["linear"],["zoom"],5.8,10,7.2,11,9.0,12],
+      "text-offset":[.85,0],
+      "text-anchor":"left",
+      "text-optional":true,
+      "text-allow-overlap":false,
+      "text-ignore-placement":false,
+      "symbol-sort-key":["match",["get","cat"],"LIFR",0,"IFR",1,"MVFR",2,"VFR",3,4]
+    },
+    paint:{
+      "text-color":"#fff",
+      "text-halo-color":"#111",
+      "text-halo-width":1.8
+    }
+  });
+  map.on("click","metar-dots",e=>{if(e.features?.[0])showMetar(e.features[0].properties)});
+ }
+
+ refreshVisibleMetars();
+}
+async function loadSnapshot(){
+ try{
+  const r=await fetch("./metars_snapshot.json",{cache:"no-store"});
+  if(!r.ok) throw new Error("snapshot missing");
+  setMetars(await r.json());
+ }catch(e){
+  setMetars({type:"FeatureCollection",features:[]});
+ }
+}
+
+async function addAirspace(){
+ try{
+  const r=await fetch("./airspace_snapshot.json",{cache:"no-store"});
+  if(!r.ok) throw new Error("airspace snapshot missing");
+  const gj=await r.json();
+  const features=gj.features||[];
+  map.addSource("faa-air",{type:"geojson",data:gj});
+  map.addLayer({id:"air-fill",type:"fill",source:"faa-air",layout:{visibility:"none"},
+   paint:{"fill-color":["match",["get","CLASS"],"B","#ff2d55","C","#bf5af2","D","#0a84ff","#999"],"fill-opacity":.045}}, "metar-dots");
+  map.addLayer({id:"air-line",type:"line",source:"faa-air",layout:{visibility:"none"},
+   paint:{"line-color":["match",["get","CLASS"],"B","#ff2d55","C","#bf5af2","D","#0a84ff","#999"],"line-width":["interpolate",["linear"],["zoom"],3,1.15,7,2.4],"line-opacity":.88}}, "metar-dots");
+  airReady=true;
+  document.getElementById("airmsg").textContent=`FAA airspace ready (${features.length.toLocaleString()} polygons)`;
+ }catch(e){
+  console.error(e);
+  document.getElementById("airmsg").textContent="Run the FAA airspace snapshot action";
+ }
+}
+map.on("load",async()=>{
+ addSatellite();
+ setMetars({type:"FeatureCollection",features:[]});
+ await Promise.all([loadSnapshot(),addAirspace()]);
+ fitCONUS();
+});
+
+function setBase(which){
+ document.querySelectorAll("[data-base]").forEach(
+  b=>b.classList.toggle("active",b.dataset.base===which)
+ );
+
+ if(map.getLayer("satellite")){
+  map.setPaintProperty("satellite","raster-opacity",which==="sat"?1:0);
+ }
+ if(map.getLayer("terrain-physical")){
+  map.setPaintProperty("terrain-physical","raster-opacity",which==="terrain"?1:0);
+ }
+ for(const id of ["terrain-major-roads-casing","terrain-major-roads","terrain-highway-shields"]){
+  if(map.getLayer(id)){
+   map.setLayoutProperty(id,"visibility",which==="terrain"?"visible":"none");
+  }
+ }
+}
+document.querySelectorAll("[data-base]").forEach(b=>b.onclick=()=>setBase(b.dataset.base));
+document.getElementById("density").addEventListener("input",e=>{
+ densitySetting=Number(e.target.value);
+ refreshVisibleMetars();
+});
+map.on("moveend",refreshVisibleMetars);
+document.getElementById("layerToggle").onclick=()=>{const p=document.getElementById("layers");p.style.display=p.style.display==="block"?"none":"block"};
+document.getElementById("plus").onclick=()=>map.easeTo({zoom:map.getZoom()+1,duration:200});
+document.getElementById("minus").onclick=()=>map.easeTo({zoom:map.getZoom()-1,duration:200});
+document.getElementById("home").onclick=fitCONUS;
+document.getElementById("airspaceBtn").onclick=()=>{
+ if(!airReady)return;
+ airOn=!airOn;const v=airOn?"visible":"none";
+ map.setLayoutProperty("air-fill","visibility",v);map.setLayoutProperty("air-line","visibility",v);
+ const b=document.getElementById("airspaceBtn");b.textContent="Airspace: "+(airOn?"ON":"OFF");b.classList.toggle("active",airOn);
+};
+
+function ageText(epoch){
+ if(!epoch)return "—";const mins=Math.max(0,Math.round((Date.now()/1000-Number(epoch))/60));
+ return mins<60?`${mins} min`:`${Math.floor(mins/60)}h ${mins%60}m`;
+}
+function showMetar(p){
+ document.getElementById("popup").style.display="block";
+ document.getElementById("ptitle").innerHTML=`${p.id||"—"} <span style="color:${COLORS[p.cat]||COLORS.UNKNOWN};font-size:16px">${p.cat||"UNKNOWN"}</span>`;
+ document.getElementById("pname").textContent=p.name||"";
+ document.getElementById("wind").textContent=p.wind||"—";document.getElementById("vis").textContent=p.vis||"—";
+ document.getElementById("ceil").textContent=p.ceil||"—";document.getElementById("alt").textContent=p.alt||"—";
+ document.getElementById("temp").textContent=p.temp||"—";document.getElementById("age").textContent=ageText(p.obsEpoch);
+ document.getElementById("raw").textContent=p.raw||"";
+}
+map.on("click",e=>{if(map.getLayer("metar-dots")&&!map.queryRenderedFeatures(e.point,{layers:["metar-dots"]}).length)document.getElementById("popup").style.display="none"});
+document.getElementById("close").onclick=()=>document.getElementById("popup").style.display="none";
+</script></body></html>
