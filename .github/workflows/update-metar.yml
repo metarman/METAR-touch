@@ -4,8 +4,6 @@ on:
   workflow_dispatch:
 
   schedule:
-    # METARs are handled frequently; airport data changes much less often.
-    # This weekly run is enough to pick up each new FAA NASR cycle automatically.
     - cron: "17 8 * * 1"
 
 permissions:
@@ -23,6 +21,12 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+
+      - name: Download current METAR cache
+        run: |
+          curl -fL \
+            "https://aviationweather.gov/data/cache/metars.cache.csv.gz" \
+            -o metars.cache.csv.gz
 
       - name: Update METAR snapshot
         run: python scripts/update_metar.py
