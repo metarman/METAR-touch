@@ -1,1 +1,43 @@
+name: Update static aviation data
 
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "23 7 * * *"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Update airports
+        run: python scripts/update_airports.py
+
+      - name: Update airspace
+        run: python scripts/update_airspace.py
+
+      - name: Commit updated static data
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add airports_snapshot.json airspace_snapshot.json
+
+          if git diff --cached --quiet; then
+            echo "No static aviation data changes."
+            exit 0
+          fi
+
+          git commit -m "Update static aviation data"
+          git push
