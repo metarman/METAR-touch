@@ -2,6 +2,9 @@
 
 import json
 import math
+import re
+import time
+import urllib.error
 import urllib.parse
 import urllib.request
 from pathlib import Path
@@ -14,6 +17,9 @@ BASE = (
 
 TOLERANCE = 0.002
 PAGE_SIZE = 100
+MAX_RETRIES = 6
+DEFAULT_RETRY_SECONDS = 65
+PAGE_DELAY_SECONDS = 1.0
 
 
 def perpendicular_distance(point, start, end):
@@ -117,135 +123,160 @@ def simplify_geometry(geometry):
     return geometry
 
 
+def retry_seconds_from_error(error, headers=None):
+    if headers is not None:
+        retry_after = headers.get("Retry-After")
+        if retry_after:
+            try:
+                return max(1, int(float(retry_after)))
+            except (TypeError, ValueError):
+                pass
+
+    text = " ".join(
+        str(x)
+        for x in [
+            error.get("message", ""),
+            *(error.get("details") or []),
+        ]
+    )
+
+    match = re.search(
+        r"retry\s+after\s+(\d+)\s*(?:sec|second)",
+        text,
+        re.IGNORECASE,
+    )
+
+    if match:
+        return max(1, int(match.group(1)))
+
+    return DEFAULT_RETRY_SECONDS
+
+
 def fetch_page(cls, offset):
     params = {
         "where": f"CLASS='{cls}'",
         "outFields":
             "NAME,IDENT,ICAO_ID,CLASS,UPPER_DESC,LOWER_DESC",
-
         "geometry": "-126,23,-65,51",
         "geometryType": "esriGeometryEnvelope",
-
         "inSR": "4326",
         "outSR": "4326",
-
         "spatialRel": "esriSpatialRelIntersects",
-
         "returnGeometry": "true",
-
         "resultOffset": str(offset),
         "resultRecordCount": str(PAGE_SIZE),
-
         "orderByFields": "OBJECTID",
-
         "f": "geojson",
     }
 
     url = BASE + "?" + urllib.parse.urlencode(params)
 
-    req = urllib.request.Request(
-        url,
-        headers={
-            "User-Agent": "METAR-touch/1.0"
-        }
-    )
+    for attempt in range(MAX_RETRIES + 1):
+        req = urllib.request.Request(
+            url,
+            headers={"User-Agent": "METAR-touch/1.0"}
+        )
 
-    with urllib.request.urlopen(
-        req,
-        timeout=180
-    ) as response:
-        return json.load(response)
+        try:
+            with urllib.request.urlopen(req, timeout=180) as response:
+                data = json.load(response)
+
+        except urllib.error.HTTPError as exc:
+            if exc.code != 429:
+                raise
+
+            wait = retry_seconds_from_error({}, exc.headers)
+
+            if attempt >= MAX_RETRIES:
+                raise RuntimeError(
+                    f"ArcGIS HTTP 429 persisted after "
+                    f"{MAX_RETRIES + 1} attempts"
+                ) from exc
+
+            print(
+                f"ArcGIS HTTP 429 for Class {cls}, offset {offset}; "
+                f"retrying in {wait}s "
+                f"(attempt {attempt + 1}/{MAX_RETRIES})",
+                flush=True,
+            )
+            time.sleep(wait)
+            continue
+
+        error = data.get("error")
+
+        if not error:
+            return data
+
+        if int(error.get("code", 0) or 0) != 429:
+            raise RuntimeError(error)
+
+        wait = retry_seconds_from_error(error)
+
+        if attempt >= MAX_RETRIES:
+            raise RuntimeError(
+                f"ArcGIS API 429 persisted after "
+                f"{MAX_RETRIES + 1} attempts: {error}"
+            )
+
+        print(
+            f"ArcGIS API 429 for Class {cls}, offset {offset}; "
+            f"retrying in {wait}s "
+            f"(attempt {attempt + 1}/{MAX_RETRIES})",
+            flush=True,
+        )
+        time.sleep(wait)
+
+    raise RuntimeError("Unreachable retry loop termination")
 
 
 features = []
 
 for cls in ("B", "C", "D"):
-
     offset = 0
 
     while True:
-        print(
-            f"Downloading Class {cls}, "
-            f"offset {offset}"
-        )
+        print(f"Downloading Class {cls}, offset {offset}")
 
-        data = fetch_page(
-            cls,
-            offset
-        )
-
-        if "error" in data:
-            raise RuntimeError(
-                data["error"]
-            )
-
-        page = data.get(
-            "features",
-            []
-        )
+        data = fetch_page(cls, offset)
+        page = data.get("features", [])
 
         if not page:
             break
 
         for feature in page:
-            feature["geometry"] = (
-                simplify_geometry(
-                    feature.get("geometry")
-                )
+            feature["geometry"] = simplify_geometry(
+                feature.get("geometry")
             )
-
             features.append(feature)
 
         if len(page) < PAGE_SIZE:
             break
 
         offset += PAGE_SIZE
+        time.sleep(PAGE_DELAY_SECONDS)
 
 
 output = {
     "type": "FeatureCollection",
-
     "features": features,
-
     "metadata": {
         "generated_utc":
-            datetime.now(
-                timezone.utc
-            ).isoformat(),
-
+            datetime.now(timezone.utc).isoformat(),
         "source":
-            "FAA Class Airspace FeatureServer; "
-            "classes B/C/D",
-
+            "FAA Class Airspace FeatureServer; classes B/C/D",
         "simplification_tolerance":
             TOLERANCE,
     },
 }
 
+encoded = json.dumps(output, separators=(",", ":"))
 
-encoded = json.dumps(
-    output,
-    separators=(",", ":")
-)
-
-Path(
-    "airspace_snapshot.json"
-).write_text(
+Path("airspace_snapshot.json").write_text(
     encoded,
     encoding="utf-8"
 )
 
+size_mb = len(encoded.encode("utf-8")) / 1024 / 1024
 
-size_mb = len(
-    encoded.encode("utf-8")
-) / 1024 / 1024
-
-print(
-    f"Wrote {len(features)} "
-    f"FAA B/C/D polygons"
-)
-
-print(
-    f"airspace_snapshot.json "
-    f"size: {size_mb:.1f} MB"
-)
+print(f"Wrote {len(features)} FAA B/C/D polygons")
+print(f"airspace_snapshot.json size: {size_mb:.1f} MB")
